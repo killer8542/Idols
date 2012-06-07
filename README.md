@@ -1,4 +1,3 @@
 Idols
 =====
-
-A collection of commands and player abilities
+A Minecraft plugin for CraftBukkit which provides a collection of commands and player abilities

@@ -1,0 +1,92 @@
+name: Idols
+main: com.octagami.idols.IdolsPlugin
+version: 0.0.9.0
+description: A collection of randomly useful commands
+authors: [octagami]
+depend: [Vault, Jobs, WorldEdit]
+
+commands:
+    cake:
+        description: Gives the player some cake
+        aliases: [c, cakeme]
+        permission: idols.cake
+        usage: /<command> [player]
+    homie:
+        description: Spawns a homie
+        permission: idols.homie
+        usage: /<command>
+    radar:
+        description: Detects nearby ore
+        permission: idols.radar
+        usage: /<command>
+    potion:
+        description: Creates potions
+        permission: idols.potion
+        usage: /<command>
+    poke:
+        description: Pokes another player
+        permission: idols.poke
+        usage: /<command> [player]
+    history:
+        description: Information about an offline player
+        permission: idols.history
+        usage: /<command> [player]
+    spawners:
+        description: Turns mob spawners off and on
+        permission: idols.spawners
+        usage: /<command> [on/off]
+    idols:
+        description: Shows help and allows a reload
+        permission: idols.idols
+        usage: /<command>
+
+permissions:
+    idols.*:
+        description: Gives access to all Idols commands
+        children:
+            idols.cake: true
+            idols.homie: true
+            idols.radar: true
+            idols.potion: true
+            idols.poke: true
+            idols.history: true
+            idols.spawners: true
+            idols.idols: true
+    idols.players.*:
+        description: Gives access to all player level Idols commands
+        children:
+            idols.cake: true
+            idols.homie: true
+            idols.radar: true
+            idols.potion: true
+            idols.poke: true
+    idols.admin.*:
+        description: Gives access to all admin level Idols commands
+        children:
+            idols.history: true
+            idols.spawners: true
+            idols.idols: true
+    idols.cake:
+        description: Gives the player some cake
+        default: false
+    idols.homie:
+        description: Spawns a homie
+        default: false
+    idols.radar:
+        description: Detects nearby ore
+        default: false
+    idols.potion:
+        description: Creates potions
+        default: false
+    idols.poke:
+        description: Pokes another player
+        default: false
+    idols.history:
+        description: Information about an offline player
+        default: op
+    idols.spawners:
+        description: Turns mob spawners off and on
+        default: op
+    idols.idols:
+        description: Shows help and allows a reload
+        default: op
