@@ -42,14 +42,14 @@ public class IdolsCommands {
     		new IdolCommand("potion", new ArrayList<String>(), 
 	        		        "false",  "Creates potions",                   new ArrayList<String>()),			        		
     	    new IdolCommand("poke",   new ArrayList<String>(), 
-    				        "false",  "Pokes another player",              new ArrayList<String>(Arrays.asList("player")))				
+    				        "false",  "Pokes another player",              new ArrayList<String>(Arrays.asList("player"))),	
+			new IdolCommand("history",new ArrayList<String>(), 
+			                "false",  "Displays the days since the player joined the server",  new ArrayList<String>())			
 
     };
     
     public static final IdolCommand[] adminCommands = {
-		
-		new IdolCommand("history",     new ArrayList<String>(), 
-				        "op",          "Information about an offline player",  new ArrayList<String>(Arrays.asList("player"))),
+	
 		new IdolCommand("spawners",    new ArrayList<String>(), 
 						"op",          "Turns mob spawners off and on",        new ArrayList<String>(Arrays.asList("on/off"))),				        
 		new IdolCommand("idols",       new ArrayList<String>(), 

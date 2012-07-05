@@ -1,8 +1,10 @@
 package com.octagami.idols.listener;
 
 import org.bukkit.ChatColor;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -45,10 +47,7 @@ public class EntityListener implements Listener {
 
 	}
 	
-	
-	
-
-	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
 	public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
 		
 		if (!plugin.isEnabled())
@@ -78,6 +77,43 @@ public class EntityListener implements Listener {
 		}	
 		
 	}
+	
+	@EventHandler(priority = EventPriority.MONITOR)
+	public void onEntityDamageByEntityMonitor(EntityDamageByEntityEvent event) {
+		
+		if(!plugin.isEnabled()) return;
+		
+		if(plugin.getDisguiseCraftAPI() == null) 
+			return;
+		
+		Entity attacker = event.getDamager();
+		Entity defender = event.getEntity();
+		
+		Player a = null;
+		Player b = null;
+
+		/*
+		 * Find the shooter if this is a projectile.
+		 */
+		if (attacker instanceof Projectile) {
+			Projectile projectile = (Projectile) attacker;
+			attacker = projectile.getShooter();
+		}
+
+		if (attacker instanceof Player)
+			a = (Player) attacker;
+		if (defender instanceof Player)
+			b = (Player) defender;
+		
+		if (a != null && b != null) {
+			
+			if (plugin.getDisguiseCraftAPI().isDisguised(a)) {
+				plugin.getDisguiseCraftAPI().undisguisePlayer(a);
+			}	
+			
+		}
+		
+	}
 
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
 	public void onEntityDamage(EntityDamageEvent event) {
@@ -93,32 +129,44 @@ public class EntityListener implements Listener {
 
 			if (cause.equals(DamageCause.FALL)) {
 
-				if (IdolsPlayerManager.getPlayer(player).canBeFallImmune()) {
+				if (IdolsPlayerManager.getPlayer(player).canBeFallImmune() &&
+					IdolsPlayerManager.getPlayer(player).isFallImmune() &&
+					event.getDamage() >= player.getHealth()) {
 
-					if (IdolsPlayerManager.getPlayer(player).isFallImmune()) {
-
-						if (event.getDamage() >= player.getHealth()) {
-
-							player.sendMessage(ChatColor.GOLD + "A committed builder fears no heights!");
-							
-							if (plugin.getIdolsConfig().emotesEnabled) {
-								
-								for (Player y : player.getWorld().getPlayers()) {
-				                    if (y != player && Util.isNear(player.getLocation(), y.getLocation(), plugin.getIdolsConfig().emoteDistance)) {
-				                        y.sendMessage(ChatColor.RED + player.getName() + " miraculously avoids falling to his death!");
-				                    }
-				                }
-							}
-							
-							event.setCancelled(true);
-
-						}
-
+					player.sendMessage(ChatColor.GOLD + "A committed builder fears no heights!");
+					
+					if (plugin.getIdolsConfig().emotesEnabled) {
+						
+						for (Player y : player.getWorld().getPlayers()) {
+		                    if (y != player && Util.isNear(player.getLocation(), y.getLocation(), plugin.getIdolsConfig().emoteDistance)) {
+		                        y.sendMessage(ChatColor.RED + player.getName() + " miraculously avoids falling to his death!");
+		                    }
+		                }
 					}
+					
+					event.setCancelled(true);
 
 				}
 
-			} else if (cause.equals(DamageCause.ENTITY_ATTACK) || cause.equals(DamageCause.PROJECTILE)) {
+			} 
+			
+		}
+		
+	}
+		
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onEntityDamageMonitor(EntityDamageEvent event) {
+		
+		if(!plugin.isEnabled()) 
+			return;
+		
+		if (event.getEntity() instanceof Player) {
+			
+			Player player = (Player) event.getEntity();
+
+			DamageCause cause = event.getCause();
+
+			if (cause.equals(DamageCause.ENTITY_ATTACK) || cause.equals(DamageCause.PROJECTILE)) {
 				
 				if (IdolsPlayerManager.getPlayer(player).canBerserk()) {
 					
@@ -142,6 +190,7 @@ public class EntityListener implements Listener {
 						} else {
 							player.sendMessage(ChatColor.GOLD + "You berserker rage has been extended!");
 						}
+						
 						IdolsPlayerManager.getPlayer(player).enableBerserk(true);
 						
 					}
@@ -149,9 +198,8 @@ public class EntityListener implements Listener {
 				}
 					
 			}
-
-		} 
-
-	}
+		}
+		
+	} 
 
 }

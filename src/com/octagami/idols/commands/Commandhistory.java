@@ -10,7 +10,6 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-import com.octagami.idols.exceptions.NotEnoughArgumentsException;
 import com.octagami.idols.util.Util;
 
 public class Commandhistory extends IdolsCommand {
@@ -24,27 +23,35 @@ public class Commandhistory extends IdolsCommand {
 
 		if (sender.hasPermission("idols.history")) {
 			
-			if (args.length > 0) {
+			OfflinePlayer targetOfflinePlayer;
+			
+			if (args.length < 1) {
 
-				OfflinePlayer targetOfflinePlayer = Bukkit.getServer().getOfflinePlayer(args[0]);
-				
-				if (targetOfflinePlayer.hasPlayedBefore()) {
-					
-					Date firstPlayedDate = new Date(targetOfflinePlayer.getFirstPlayed());
-					//Date lastPlayedDate = new Date(targetOfflinePlayer.getLastPlayed());
-					
-					long totalDays = Util.getTimeRemaining(firstPlayedDate, new Date(), TimeUnit.DAYS);
-					
-					sender.sendMessage(targetOfflinePlayer.getName() + " has been on the server for " + Long.toString(totalDays) + " days, starting on " + firstPlayedDate.toString());
-					
-				} else {
-
-					sender.sendMessage(ChatColor.RED + args[0] + " has never played on this server before.");
-				}
-
+				targetOfflinePlayer = Bukkit.getServer().getOfflinePlayer(sender.getName());
+			
 			} else {
 
-				throw new NotEnoughArgumentsException(command, commandLabel);
+				if (!sender.hasPermission("idols.history.others")) {
+					
+					sender.sendMessage(ChatColor.RED + " You don't have permission to check the history of other players");
+					return;
+				}
+				
+				targetOfflinePlayer = Bukkit.getServer().getOfflinePlayer(args[0]);
+				
+			}
+			
+			if (targetOfflinePlayer.hasPlayedBefore()) {
+				
+				Date firstPlayedDate = new Date(targetOfflinePlayer.getFirstPlayed());
+				
+				long totalDays = Util.getTimeRemaining(firstPlayedDate, new Date(), TimeUnit.DAYS);
+				
+				sender.sendMessage(targetOfflinePlayer.getName() + " has been on the server for " + Long.toString(totalDays) + " days, starting on " + firstPlayedDate.toString());
+				
+			} else {
+
+				sender.sendMessage(ChatColor.RED + args[0] + " has never played on this server before.");
 			}
 			
 		}

@@ -105,15 +105,15 @@ public class BlockListener implements Listener {
 		            				// Player is a mod or admin
 		            				alertColor = ChatColor.GREEN;
 					    		}
-		            			else if (player.hasPermission("xray.warned") || player.hasPermission("xray.banned")) {
+		            			else if (player.hasPermission("warned.xray") || player.hasPermission("banned.xray")) {
 		            				
 		            				alertColor = ChatColor.DARK_RED;
 		            				
-		            			} else if (player.hasPermission("xray.suspect")) {
+		            			} else if (player.hasPermission("suspect.xray")) {
 		            				
 		            				alertColor = ChatColor.RED;
 		            				
-		            			} else if (player.hasPermission("xray.legit")) {
+		            			} else if (player.hasPermission("legit.xray")) {
 		            				
 		            				alertColor = ChatColor.GREEN;
 		            				

@@ -1,5 +1,6 @@
 package com.octagami.idols.commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
@@ -41,6 +42,50 @@ public class Commandradar extends PlayerCommand {
 		else if (args[0].equalsIgnoreCase("cancel") || args[0].equalsIgnoreCase("off") || args[0].equalsIgnoreCase("stop")){
 			
 			IdolsPlayerManager.getPlayer(player).enableRadar(false, -1);
+			
+		} else if (args[0].equalsIgnoreCase("check")){
+			
+			if (!player.hasPermission("idols.radar.check"))
+				return;
+			
+			Player other = null;
+			
+			if (args.length > 1) {
+				other = Bukkit.getServer().getPlayer(args[1]);
+			} else {
+				other = player;
+			}
+			
+			
+			if (other == null) {
+
+				sender.sendMessage(ChatColor.RED + args[1] + " is not online!");
+
+			} else{
+				
+				IdolsPlugin plugin;
+
+				int radarCooldown = 0;
+				
+				plugin = Idols.getPlugin();
+				
+				if (plugin.getIdolsConfig() != null)
+					radarCooldown = plugin.getIdolsConfig().radarCooldown;
+				
+				long cooldown = Idols.getAbilityCooldownTimeRemaining(other.getName(), "radar");
+				
+				long timeUsed = cooldown - radarCooldown;
+				
+				if (cooldown == 0) {
+					
+					player.sendMessage(ChatColor.GOLD + other.getName() + " hasn't used radar recently");
+					
+				} else {
+					
+					player.sendMessage(ChatColor.GOLD + other.getName() + " last used radar " + Long.toString(timeUsed / 60 * -1)  + " minute(s) and " + Long.toString(timeUsed % 60 * -1)  + " second(s) ago");
+				}
+				
+			}
 			
 		} else {
 			
