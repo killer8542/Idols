@@ -21,10 +21,13 @@ public class Commandspawners extends IdolsCommand {
 			if (args.length == 0) {
 
 				if (Idols.getPlugin().getIdolsConfig().areSpawnersDisabled()) {
-					sender.sendMessage("Mob spawners are: Disabled");
+					sender.sendMessage("Mob spawners are now enabled");
+					Idols.getPlugin().getIdolsConfig().setDisableSpawners(false);
 				} else {
-					sender.sendMessage("Mob spawners are: Enabled");
+					sender.sendMessage("Mob spawners are now disabled");
+					Idols.getPlugin().getIdolsConfig().setDisableSpawners(true);
 				}
+				
 			} else {
 
 				if (args[0].equals("off") || args[0].equals("disable")) {
