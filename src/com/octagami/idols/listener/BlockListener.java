@@ -1,9 +1,13 @@
 package com.octagami.idols.listener;
 
-import me.zford.jobs.config.container.Job;
+import me.zford.jobs.bukkit.actions.BlockActionInfo;
+import me.zford.jobs.container.ActionType;
+import me.zford.jobs.container.Job;
+import me.zford.jobs.container.JobsPlayer;
 
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,7 +16,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 
-import com.octagami.idols.Idols;
 import com.octagami.idols.IdolsPlayerManager;
 import com.octagami.idols.IdolsPlugin;
 
@@ -25,41 +28,47 @@ public class BlockListener implements Listener {
 		this.plugin = plugin;
 	}
 	
-
     @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
     public void onBlockPlace(BlockPlaceEvent event) {
     
-        if(!plugin.isEnabled()) 
-        	return;
+        if(!plugin.isEnabled()) return;
        
         // check to make sure you can build
-        if(!event.canBuild()) 
-        	return;
+        if(!event.canBuild()) return;
         
         Player player = event.getPlayer();
         
-        // check if in creative
-        if (player.getGameMode().equals(GameMode.CREATIVE))
-            return;
-         
-        String blockName = event.getBlock().getType().name();
+        if (player == null) return;
         
-		for (Job job : Idols.getBuilderJobs()) {
-		
-			if (job.getPlaceInfo().get(blockName) != null) {
-				
-				if ( job.getPlaceInfo().get(blockName).getXpGiven() > 0 ) {
-					
-					IdolsPlayerManager.getPlayer(player).enableFallImmunity(true);
-					//plugin.getLogger().info("Setting fall immunity for " + player.getName() );
-					break;
-					
-				}
-					
-			}
+        // check if in creative
+        if (player.getGameMode().equals(GameMode.CREATIVE)) return;
+    
+        if (IdolsPlayerManager.getPlayer(player).canBeFallImmune()) {
+        	
+        	JobsPlayer worker = plugin.getJobsHook().getPlayerManager().getJobsPlayer(player.getName());
+			
+			if (worker == null) return;
+			
+        	for (Job job : plugin.getIdolsConfig().getBuilderJobs()) {
 
-		}
-	            
+				if ( !worker.isInJob(job) )
+					continue;
+
+    			Double blockXP = job.getExperience(new BlockActionInfo(event.getBlock(), ActionType.PLACE), 1, 1);
+    				
+    			if (blockXP != null && blockXP > 0) {
+    				
+    				IdolsPlayerManager.getPlayer(player).enableFallImmunity(true);
+    				
+    				if (plugin.getIdolsConfig().DEBUG)
+    					plugin.getLogger().info("Setting fall immunity for " + player.getName() );
+    			}
+
+    			break;
+    		}
+        	
+        }
+ 
     }
     
     
@@ -74,7 +83,7 @@ public class BlockListener implements Listener {
     	
     	final String playerName = event.getPlayer().getName();
     	
-    	if ( IdolsPlayerManager.getPlayer(event.getPlayer()).getDiamondCounter() == 0 ) {
+    	if ( IdolsPlayerManager.getPlayer(event.getPlayer()).getDiamondBreakCounter() == 0 ) {
     		
     		IdolsPlayerManager.getPlayer(event.getPlayer()).incrementDiamondCounter();
     		
@@ -86,8 +95,8 @@ public class BlockListener implements Listener {
 	            	
 	            	if (player != null) {
 	            		
-	            		int amountMined = IdolsPlayerManager.getPlayer(player).getDiamondCounter();
-		            	int totalMined = IdolsPlayerManager.getPlayer(player).getTotalDiamonds();
+	            		int amountMined = IdolsPlayerManager.getPlayer(player).getDiamondBreakCounter();
+		            	int totalMined = IdolsPlayerManager.getPlayer(player).getTotalDiamondsBroken();
 		            	
 		            	String alertString = player.getName() + " just broke " + Integer.toString(amountMined) + " diamond ore. " +
 	                            Integer.toString(totalMined) + " total have been mined this session";

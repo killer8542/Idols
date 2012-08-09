@@ -17,8 +17,7 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import pgDev.bukkit.DisguiseCraft.DisguiseCraft;
 import pgDev.bukkit.DisguiseCraft.api.DisguiseCraftAPI;
 
-
-import me.zford.jobs.Jobs;
+import me.zford.jobs.bukkit.JobsPlugin;
 import net.milkbowl.vault.Vault;
 import net.milkbowl.vault.chat.Chat;
 import net.milkbowl.vault.economy.Economy;
@@ -35,7 +34,7 @@ public class IdolsPlugin extends JavaPlugin {
 	public static final String		NAME				= "Idols";
 	public static final String		PERMISSION_ROOT		= "idols.";
 	public static final String		MAIN_CLASS			= IdolsPlugin.class.getName();
-	public static final String		VERSION				= "0.0.9.4";
+	public static final String		VERSION				= "0.0.9.11";
 	public static final String		DESCRIPTION			= "A collection of randomly useful commands";
 	public static final String[]	AUTHORS				= { "octagami" };
 	public static final String		WEBSITE				= "";
@@ -44,7 +43,7 @@ public class IdolsPlugin extends JavaPlugin {
 	public static final String[]	SOFT_DEPENDENCIES	= {};
 	
     private IdolsConfig config = null;
-    private Jobs jobs = null;
+    private JobsPlugin jobs = null;
     private Economy economy = null;
     private DisguiseCraftAPI dcAPI = null;
 
@@ -79,7 +78,6 @@ public class IdolsPlugin extends JavaPlugin {
 
 	}
 
-
 	@Override
 	public void onEnable() {
 		
@@ -108,9 +106,6 @@ public class IdolsPlugin extends JavaPlugin {
         }
         
         loadDisguiseCraft();
-        
-        Idols.setJobs(jobs);
-        
 
 		initConfig();
 		initCommands();
@@ -142,28 +137,17 @@ public class IdolsPlugin extends JavaPlugin {
 	}
 	
 	public void reload() {
-		
-		//getServer().getScheduler().cancelTasks(this);
-		
+
 		config.reload();
 		
-		//startPolling();
 	}
-	
-	public void startPolling() {
-		
-		//long pollInterval = (long)config.potionPollInterval * 20;
-		
-		//getServer().getScheduler().scheduleAsyncRepeatingTask(this, new EffectRemoveTask(this), 60L,  pollInterval);
-	}
-	
 	
     public IdolsConfig getIdolsConfig() {
     	
     	return config;
     }
     
-    public Jobs getJobsHook() {
+    public JobsPlugin getJobsHook() {
     	
     	return jobs;
     }
@@ -180,9 +164,9 @@ public class IdolsPlugin extends JavaPlugin {
     	
     	Plugin test = getServer().getPluginManager().getPlugin("Jobs");
     	
-    	if (test != null && test instanceof Jobs) {
+    	if (test != null && test instanceof JobsPlugin) {
     		
-    		jobs = (Jobs)test;
+    		jobs = (JobsPlugin)test;
     		getLogger().info("Successfully linked with Jobs.");
     	    return true;
     	    
@@ -225,8 +209,5 @@ public class IdolsPlugin extends JavaPlugin {
         getLogger().info("Successfully linked with DisguiseCraft");
         return true;
     }
-    
-    
-
 
 }

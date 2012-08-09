@@ -1,15 +1,9 @@
 package com.octagami.idols.listener;
 
-
-//import org.bukkit.ChatColor;
-//import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-//import org.bukkit.event.EventHandler;
-//import org.bukkit.event.player.PlayerJoinEvent;
-//
-//import com.octagami.idols.IdolsPerms;
 import com.octagami.idols.IdolsPlayerManager;
 import com.octagami.idols.IdolsPlugin;
 
@@ -23,17 +17,23 @@ public class LoginListener implements Listener {
 
 	}
 
-//	@EventHandler
-//	public void onPlayerJoin(PlayerJoinEvent event) {
-//
-//		Player player = event.getPlayer();
-//
-//		if (IdolsPerms.canPoke(player)) {
-//
-//			player.sendMessage(ChatColor.GOLD + "Idols has given you the power to poke. Use it wisely!");
-//		}
-//
-//	}
+	@EventHandler
+	public void onPlayerJoin(PlayerJoinEvent event) {
+
+		if (!plugin.getIdolsConfig().areJoinMessagesEnabled()) {
+			event.setJoinMessage("");
+		}
+
+	}
+	
+	@EventHandler
+	public void onPlayerLeave(PlayerQuitEvent event) {
+
+		if (!plugin.getIdolsConfig().areLeaveMessagesEnabled()) {
+			event.setQuitMessage("");
+		}
+
+	}
 	
 	@EventHandler
 	public void onPlayerQuit(PlayerQuitEvent event) {

@@ -2,11 +2,22 @@ package com.octagami.idols;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import me.zford.jobs.container.Job;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 public class IdolsConfig {
+	
+	private IdolsPlugin plugin;
+	
+	public boolean DEBUG = false;
+	
+	@SuppressWarnings("unused")
+	private String configVersion = "";
 	
 	public final String GENERAL_CONFIG_NAME = "generalConfig.yml";
 	public final String ENCHANT_CONFIG_NAME = "enchantsConfig.yml";
@@ -15,6 +26,8 @@ public class IdolsConfig {
 	public int berserkDuration = 30;
 	public double berserkCritMultiplier = 1.0;
     
+	private ArrayList<Job> builderJobs = new ArrayList<Job>();
+	
 	public int fallImmunityDuration = 30;
 	
 	public int potionPollInterval = 4;
@@ -45,9 +58,13 @@ public class IdolsConfig {
 	public int emoteDistance = 10;
 	
 	private boolean disableSpawners = false;
+	
+	private boolean globalMute = false;
+	
+	private boolean joinMessageEnabled = true;
+	
+	private boolean leaveMessageEnabled = true;
   
-    private IdolsPlugin plugin;
-    
     public IdolsConfig(IdolsPlugin plugin) {
         this.plugin = plugin;
     }
@@ -57,13 +74,37 @@ public class IdolsConfig {
     	return disableSpawners;
     }
     
+    public boolean areJoinMessagesEnabled() {
+    	
+    	return joinMessageEnabled;
+    }
+    
+    public boolean areLeaveMessagesEnabled() {
+    	
+    	return leaveMessageEnabled;
+    }
+    
     public void setDisableSpawners(boolean value) {
     	
     	disableSpawners = value;
     }
     
+    public boolean isGlobalMuteOn() {
+		return globalMute;
+	}
+
+	public void setGlobalMute(boolean globalMute) {
+		this.globalMute = globalMute;
+	}
+	
+	public ArrayList<Job> getBuilderJobs() {
+    	
+    	return builderJobs;
+    }
+    	
     public void reload() {
 
+    	builderJobs.clear();
     	loadSettings();
     }
     
@@ -97,6 +138,16 @@ public class IdolsConfig {
             return;
         }
         
+        // Check if debug is on
+        if (!conf.contains("debug"))
+        	conf.set("debug", false);
+        DEBUG = conf.getBoolean("debug");
+        
+        // Get config version
+        if (!conf.contains("version"))
+        	conf.set("version", 0.1);
+        configVersion = conf.getString("version");
+        
         
         // Soldier
         ConfigurationSection soldierSection = conf.getConfigurationSection("Soldier");
@@ -123,7 +174,18 @@ public class IdolsConfig {
         // Builder
         ConfigurationSection builderSection = conf.getConfigurationSection("Builder");
         if (builderSection == null) builderSection = conf.createSection("Builder");
+
+        if (builderSection.getStringList("job-names").isEmpty()) 
+        	builderSection.set("job-names", new ArrayList<String>( Arrays.asList("Builder") ) );
         
+        for (String jobName : builderSection.getStringList("job-names")) {
+        	
+        	Job builderJob = plugin.getJobsHook().getJobsCore().getJob(jobName);
+        	
+        	if (builderJob != null)
+        		builderJobs.add(builderJob);
+        }
+         
         ConfigurationSection fallImmunitySection  = builderSection.getConfigurationSection("Fall-Immunity");
         if (fallImmunitySection == null) fallImmunitySection = builderSection.createSection("Fall-Immunity");
         
@@ -249,11 +311,18 @@ public class IdolsConfig {
         }
         emoteDistance = emotesSection.getInt("distance");
         
+        ConfigurationSection chatSection  = miscSection.getConfigurationSection("Chat");
+        if (chatSection == null) chatSection = miscSection.createSection("Chat");
         
-        //plugin.getServer().getLogger().info("berserkFrequency = " + Integer.toString(berserkFrequency));
-        //plugin.getServer().getLogger().info("berserkDuration = " + Integer.toString(berserkDuration));
-        //plugin.getServer().getLogger().info("berserkCritMultiplier = " + Double.toString(berserkCritMultiplier));      
-        //plugin.getServer().getLogger().info("fallImmunityDuration = " + Integer.toString(fallImmunityDuration));
+        if (!chatSection.contains("join-message")) {
+        	chatSection.set("join-message", true);
+        }
+        joinMessageEnabled = chatSection.getBoolean("join-message");
+        
+        if (!chatSection.contains("leave-message")) {
+        	chatSection.set("leave-message", true);
+        }
+        leaveMessageEnabled = chatSection.getBoolean("leave-message");
         
         try {
             conf.save(f);
@@ -262,7 +331,8 @@ public class IdolsConfig {
         }
         
     }
-    	
+
+	
     
     
 }
