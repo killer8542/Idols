@@ -61,23 +61,36 @@ public class RadarTask implements Runnable {
 			
 			player.sendMessage(ChatColor.GOLD + "You sense " + Material.getMaterial(oreId).name().replace("_", " ").toLowerCase() + " nearby!");
 			
-			int distance = 10;
 			boolean emotesEnabled = true;
+			int defaultDistance = 10;
 			
 			try {
 				emotesEnabled = Idols.getPlugin().getIdolsConfig().emotesEnabled;
-				distance = Idols.getPlugin().getIdolsConfig().emoteDistance;
+				defaultDistance = Idols.getPlugin().getIdolsConfig().emoteDistance;
 			} catch (IdolsNotLoadedException e) {
 				e.printStackTrace();
 			}
-			
+
 			if (emotesEnabled) {
 				
-				for (Player y : player.getWorld().getPlayers()) {
-	                if (y != player && Util.isNear(player.getLocation(), y.getLocation(), distance)) {
-	                    y.sendMessage(ChatColor.RED + player.getName() + " senses ore nearby!");
-	                }
-	            }
+				final String radarPlayerName = playerName;
+				final int distance = defaultDistance;
+				
+				plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+
+					   public void run() {
+						   
+						   Player radarPlayer = plugin.getServer().getPlayer(radarPlayerName);
+						   
+						   for (Player y : radarPlayer.getWorld().getPlayers()) {
+				                if (y != radarPlayer && Util.isNear(radarPlayer.getLocation(), y.getLocation(), distance)) {
+				                    y.sendMessage(ChatColor.RED + radarPlayer.getName() + " senses ore nearby!");
+				                }
+				            }
+					   }
+					   
+				}, 0L);
+				
 			}
 
 		}
