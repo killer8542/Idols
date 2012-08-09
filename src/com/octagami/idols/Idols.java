@@ -1,14 +1,10 @@
 package com.octagami.idols;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-
-import me.zford.jobs.Jobs;
-import me.zford.jobs.config.container.Job;
 
 import com.octagami.idols.exceptions.IdolsNotLoadedException;
 import com.octagami.idols.util.Util;
@@ -16,9 +12,6 @@ import com.octagami.idols.util.Util;
 public class Idols {
 
 	private static IdolsPlugin	instance;
-	
-	private static ArrayList<Job> builderJobs = new ArrayList<Job>();
-	private static ArrayList<Job> soldierJobs = new ArrayList<Job>();
 	
 	private static HashMap<String, HashMap<String, Date>> playerCooldowns = new HashMap<String, HashMap<String, Date>>();
 	
@@ -36,46 +29,13 @@ public class Idols {
 	public static void clear() {
 		
 		playerCooldowns.clear();
-		builderJobs.clear();
-		soldierJobs.clear();
+
 	}
 
 	private static void check() throws IdolsNotLoadedException {
 		if (Idols.instance == null) {
 			throw new IdolsNotLoadedException();
 		}
-	}
-	
-	public static ArrayList<Job> getBuilderJobs() { 
-	
-		return builderJobs;
-	}
-	
-	public static ArrayList<Job> getSoldierJobs() { 
-		
-		return soldierJobs;
-	}
-	
-	public static void setJobs(Jobs jobs) {
-		
-		final Job builder = jobs.getJobConfig().getJob("Builder");
-		final Job mason = jobs.getJobConfig().getJob("Mason");
-		final Job engineer = jobs.getJobConfig().getJob("Engineer");
-		
-		builderJobs.add(builder);
-		builderJobs.add(mason);
-		builderJobs.add(engineer);
-		
-		
-		final Job soldier = jobs.getJobConfig().getJob("Soldier");
-		final Job centurion = jobs.getJobConfig().getJob("Centurion");
-		final Job samurai = jobs.getJobConfig().getJob("Samurai");
-		
-		
-		soldierJobs.add(soldier);
-		soldierJobs.add(centurion);
-		soldierJobs.add(samurai);
-
 	}
 	
 	public static HashMap<String, HashMap<String, Date>> getAllCooldowns(){

@@ -197,7 +197,25 @@ public class EntityListener implements Listener {
 					
 				}
 					
+			} else if (cause.equals(DamageCause.FIRE_TICK)) {
+				
+				if (IdolsPlayerManager.getPlayer(player).canBeFireResistant()) {
+					
+					if (IdolsPlayerManager.getPlayer(player).isFireResist()) {
+						event.setCancelled(true);
+						IdolsPlayerManager.getPlayer(player).enableFireResist(false);
+					}else {
+						
+						if (plugin.getIdolsConfig().DEBUG)
+							plugin.getLogger().info("Took fire damage. Enabling immunity to negate next fire tick");
+							
+						IdolsPlayerManager.getPlayer(player).enableFireResist(true);
+					}
+
+				}
+				
 			}
+			
 		}
 		
 	} 

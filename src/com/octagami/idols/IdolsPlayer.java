@@ -19,34 +19,36 @@ public class IdolsPlayer {
 	private boolean	radar = false;
 	private int radarTimerTaskId = -1;
 	
-	private int diamondCounter = 0;
+	private boolean	fireResist = false;
 	
-	private int totalDiamonds = 0;
+	private int diamondBreakCounter = 0;
+	
+	private int totalDiamondsBroken = 0;
 
 	public IdolsPlayer(Player player) {
 
 		this.player= player;
 	}
 	
-	public int getDiamondCounter() {
+	public int getDiamondBreakCounter() {
 		
-		return diamondCounter;
+		return diamondBreakCounter;
 	}
 	
 	public void resetDiamondCounter() {
 		
-		diamondCounter = 0;
+		diamondBreakCounter = 0;
 	}
 	
 	public void incrementDiamondCounter() {
 		
-		diamondCounter++;
-		totalDiamonds++;
+		diamondBreakCounter++;
+		totalDiamondsBroken++;
 	}
 	
-	public int getTotalDiamonds() {
+	public int getTotalDiamondsBroken() {
 		
-		return totalDiamonds;
+		return totalDiamondsBroken;
 	}
 	
 	
@@ -82,11 +84,26 @@ public class IdolsPlayer {
 		return player.hasPermission("idols.display.damage");
 	}
 	
+	public boolean canBeFireResistant() {
+		
+		return player.hasPermission("idols.fireresist");
+	}
+	
+	public boolean isFireResist() {
+		
+		return this.fireResist;
+	}
+	
+	public void enableFireResist(boolean value) {
+		
+		this.fireResist = value;
+	}
+	
 	public boolean canBeFallImmune() {
 		
 		return player.hasPermission("idols.fallimmunity");
 	}
-
+	
 	public boolean isFallImmune() {
 		
 		return this.fallImmunity;
