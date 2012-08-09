@@ -6,10 +6,9 @@ import org.bukkit.command.CommandSender;
 import com.octagami.idols.IdolsPlugin;
 
 
-@SuppressWarnings("unused")
 public class IdolsCommand {
 
-	private IdolsPlugin		plugin;
+	public IdolsPlugin		plugin;
 
 	private final String	name;
 
