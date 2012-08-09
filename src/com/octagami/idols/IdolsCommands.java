@@ -33,7 +33,7 @@ public class IdolsCommands {
 	//@formatter:off
     public static final IdolCommand[] playerCommands = {
     		
-			new IdolCommand("cake",   new ArrayList<String>(Arrays.asList("c", "cakeme")), 
+			new IdolCommand("cake",   new ArrayList<String>(), 
 							"false",  "Gives the player some cake",        new ArrayList<String>(Arrays.asList("player"))),
     		new IdolCommand("homie",  new ArrayList<String>(), 
 			        		"false",  "Spawns a homie",                    new ArrayList<String>()),
@@ -51,7 +51,9 @@ public class IdolsCommands {
     public static final IdolCommand[] adminCommands = {
 	
 		new IdolCommand("spawners",    new ArrayList<String>(), 
-						"op",          "Turns mob spawners off and on",        new ArrayList<String>(Arrays.asList("on/off"))),				        
+						"op",          "Turns mob spawners off and on",        new ArrayList<String>(Arrays.asList("on/off"))),
+		new IdolCommand("globalmute",  new ArrayList<String>(), 
+				        "op",          "Mute or unmute all players",           new ArrayList<String>(Arrays.asList("on/off"))),
 		new IdolCommand("idols",       new ArrayList<String>(), 
 		                "op",          "Shows help and allows a reload",       new ArrayList<String>())
     };

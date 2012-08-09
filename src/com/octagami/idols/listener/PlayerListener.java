@@ -1,10 +1,5 @@
 package com.octagami.idols.listener;
 
-
-import me.zford.jobs.config.container.Job;
-import me.zford.jobs.config.container.JobsMaterialInfo;
-import me.zford.jobs.config.container.JobsPlayer;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -15,12 +10,15 @@ import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
@@ -41,6 +39,33 @@ public class PlayerListener implements Listener {
 	public PlayerListener(IdolsPlugin plugin) {
 
 		this.plugin = plugin;
+	}
+	
+	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
+    public void onAsyncPlayerChatEvent(AsyncPlayerChatEvent event) {
+		
+		if (!plugin.isEnabled()) return;
+		
+		Player player = event.getPlayer();
+		
+		if (player == null) return;
+		
+		
+		if (plugin.getIdolsConfig().isGlobalMuteOn()) {
+			
+			if (!player.hasPermission("idols.globalmute.exempt")){
+				
+				plugin.getLogger().info(player.getName() + " tried to say: " + event.getMessage());
+				player.sendMessage(ChatColor.RED + "All players are currently muted. You cannot speak now");
+				event.setCancelled(true);
+			}
+		}
+			
+		if (player.hasPermission("warned.caps")) {
+			
+			event.setMessage(event.getMessage().toLowerCase());
+		}
+		
 	}
 	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
@@ -136,7 +161,10 @@ public class PlayerListener implements Listener {
 				 
 			 }
         	 
-			 break;
+			 	break;
+			 	
+			 default:
+				 break;
          }
          
     }
