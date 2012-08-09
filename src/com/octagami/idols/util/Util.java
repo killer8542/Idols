@@ -55,10 +55,10 @@ public class Util {
 	    		return diff / (60 * 60 * 1000);
 	    	case DAYS:
 	    		return diff / (24 * 60 * 60 * 1000);
+			default:
+				return -1;
 	    
 	    }
-        
-	    return -1;
   }
 
     
