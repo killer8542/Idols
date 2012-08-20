@@ -14,9 +14,6 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
-import pgDev.bukkit.DisguiseCraft.DisguiseCraft;
-import pgDev.bukkit.DisguiseCraft.api.DisguiseCraftAPI;
-
 import me.zford.jobs.bukkit.JobsPlugin;
 import net.milkbowl.vault.Vault;
 import net.milkbowl.vault.chat.Chat;
@@ -34,7 +31,7 @@ public class IdolsPlugin extends JavaPlugin {
 	public static final String		NAME				= "Idols";
 	public static final String		PERMISSION_ROOT		= "idols.";
 	public static final String		MAIN_CLASS			= IdolsPlugin.class.getName();
-	public static final String		VERSION				= "0.0.9.11";
+	public static final String		VERSION				= "0.0.9.12";
 	public static final String		DESCRIPTION			= "A collection of randomly useful commands";
 	public static final String[]	AUTHORS				= { "octagami" };
 	public static final String		WEBSITE				= "";
@@ -45,9 +42,7 @@ public class IdolsPlugin extends JavaPlugin {
     private IdolsConfig config = null;
     private JobsPlugin jobs = null;
     private Economy economy = null;
-    private DisguiseCraftAPI dcAPI = null;
 
-    
 	public void initConfig() {
 
 		config = new IdolsConfig(this);
@@ -104,8 +99,6 @@ public class IdolsPlugin extends JavaPlugin {
             setEnabled(false);
             return;
         }
-        
-        loadDisguiseCraft();
 
 		initConfig();
 		initCommands();
@@ -127,8 +120,6 @@ public class IdolsPlugin extends JavaPlugin {
 		config = null;
 		jobs = null;
 		economy = null;
-		dcAPI = null;
-		
 		
 		Idols.clear();
 		Idols.setInstance(null);
@@ -154,10 +145,6 @@ public class IdolsPlugin extends JavaPlugin {
     
     public Economy getEconomy() {
 		return economy;
-	}
-    
-    public DisguiseCraftAPI getDisguiseCraftAPI() {
-		return dcAPI;
 	}
     
     private boolean loadJobs() {
@@ -195,19 +182,4 @@ public class IdolsPlugin extends JavaPlugin {
         return true;
     }
     
-    
-    private boolean loadDisguiseCraft() {
-    	
-        Plugin test = getServer().getPluginManager().getPlugin("DisguiseCraft");
-        if (test == null) {
-        	getLogger().severe("Could not find DisguiseCraft!");
-            return false;       
-        }
-        	
-        dcAPI = DisguiseCraft.getAPI();
-        
-        getLogger().info("Successfully linked with DisguiseCraft");
-        return true;
-    }
-
 }

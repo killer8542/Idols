@@ -1,10 +1,8 @@
 package com.octagami.idols.listener;
 
 import org.bukkit.ChatColor;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -75,43 +73,6 @@ public class EntityListener implements Listener {
 			}
 			
 		}	
-		
-	}
-	
-	@EventHandler(priority = EventPriority.MONITOR)
-	public void onEntityDamageByEntityMonitor(EntityDamageByEntityEvent event) {
-		
-		if(!plugin.isEnabled()) return;
-		
-		if(plugin.getDisguiseCraftAPI() == null) 
-			return;
-		
-		Entity attacker = event.getDamager();
-		Entity defender = event.getEntity();
-		
-		Player a = null;
-		Player b = null;
-
-		/*
-		 * Find the shooter if this is a projectile.
-		 */
-		if (attacker instanceof Projectile) {
-			Projectile projectile = (Projectile) attacker;
-			attacker = projectile.getShooter();
-		}
-
-		if (attacker instanceof Player)
-			a = (Player) attacker;
-		if (defender instanceof Player)
-			b = (Player) defender;
-		
-		if (a != null && b != null) {
-			
-			if (plugin.getDisguiseCraftAPI().isDisguised(a)) {
-				plugin.getDisguiseCraftAPI().undisguisePlayer(a);
-			}	
-			
-		}
 		
 	}
 

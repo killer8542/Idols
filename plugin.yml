@@ -1,6 +1,6 @@
 name: Idols
 main: com.octagami.idols.IdolsPlugin
-version: 0.0.9.11
+version: 0.0.9.12
 description: A collection of randomly useful commands
 authors: [octagami]
 depend: [Vault, Jobs, WorldEdit]
