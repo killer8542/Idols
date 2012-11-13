@@ -22,8 +22,6 @@ public class EffectRemoveTask implements Runnable {
     	this.plugin = plugin;
     }
 
-
-    @SuppressWarnings("deprecation")
 	@Override
     public void run() {
     	
@@ -53,10 +51,8 @@ public class EffectRemoveTask implements Runnable {
 	            
     		}
     		
-    		
     	}
+    	
     }
-    
-   
-    
+
 }

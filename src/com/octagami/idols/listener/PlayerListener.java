@@ -41,40 +41,12 @@ public class PlayerListener implements Listener {
 		this.plugin = plugin;
 	}
 	
-	@EventHandler(priority=EventPriority.HIGHEST, ignoreCancelled=true)
-    public void onAsyncPlayerChatEvent(AsyncPlayerChatEvent event) {
-		
-		if (!plugin.isEnabled()) return;
-		
-		Player player = event.getPlayer();
-		
-		if (player == null) return;
-		
-		
-		if (plugin.getIdolsConfig().isGlobalMuteOn()) {
-			
-			if (!player.hasPermission("idols.globalmute.exempt")){
-				
-				plugin.getLogger().info(player.getName() + " tried to say: " + event.getMessage());
-				player.sendMessage(ChatColor.RED + "All players are currently muted. You cannot speak now");
-				event.setCancelled(true);
-			}
-		}
-			
-		if (player.hasPermission("warned.caps")) {
-			
-			event.setMessage(event.getMessage().toLowerCase());
-		}
-		
-	}
-	
 	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
     public void onPlayerDeath(PlayerDeathEvent event) {
 		
 		IdolsPlayerManager.playerDied(event.getEntity());
 	}
 	
-    @SuppressWarnings("deprecation")
 	@EventHandler(priority = EventPriority.LOW)
     public void onPlayerInteract(PlayerInteractEvent event) {
 
@@ -96,11 +68,9 @@ public class PlayerListener implements Listener {
 				 
 				 if (potionID == 27) {
 					 
-					  
 					  duration = plugin.getIdolsConfig().smoothDuration;
 					  effect = new PotionEffect(PotionEffectType.NIGHT_VISION, duration * 20, 0);
 					  
-	 
 				 } else if (potionID == 29) {
 					 
 					 duration = plugin.getIdolsConfig().suaveDuration;
