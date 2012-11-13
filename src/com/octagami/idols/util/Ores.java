@@ -15,6 +15,9 @@ public class Ores {
 
 	static
 	{	
+		ORES.put("emerald", Material.EMERALD_ORE);
+		ORES.put("emeraldore", Material.EMERALD_ORE);
+		
 		ORES.put("diamond", Material.DIAMOND_ORE);
 		ORES.put("diamondore", Material.DIAMOND_ORE);
 		
@@ -47,6 +50,7 @@ public class Ores {
 		ORE_TYPES.add(Material.LAPIS_ORE);
 		ORE_TYPES.add(Material.GOLD_ORE);
 		ORE_TYPES.add(Material.DIAMOND_ORE);
+		ORE_TYPES.add(Material.EMERALD_ORE);
 		
 	}
 	
