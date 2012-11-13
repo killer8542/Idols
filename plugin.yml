@@ -1,6 +1,6 @@
 name: Idols
 main: com.octagami.idols.IdolsPlugin
-version: 0.0.9.12
+version: 0.0.9.15
 description: A collection of randomly useful commands
 authors: [octagami]
 depend: [Vault, Jobs, WorldEdit]
@@ -34,10 +34,6 @@ commands:
         description: Turns mob spawners off and on
         permission: idols.spawners
         usage: /<command> [on/off]
-    globalmute:
-        description: Mute or unmute all players
-        permission: idols.globalmute
-        usage: /<command> [on/off]
     idols:
         description: Shows help and allows a reload
         permission: idols.idols
@@ -54,7 +50,6 @@ permissions:
             idols.poke: true
             idols.history: true
             idols.spawners: true
-            idols.globalmute: true
             idols.idols: true
     idols.players.*:
         description: Gives access to all player level Idols commands
@@ -69,7 +64,6 @@ permissions:
         description: Gives access to all admin level Idols commands
         children:
             idols.spawners: true
-            idols.globalmute: true
             idols.idols: true
     idols.cake:
         description: Gives the player some cake
@@ -91,9 +85,6 @@ permissions:
         default: false
     idols.spawners:
         description: Turns mob spawners off and on
-        default: op
-    idols.globalmute:
-        description: Mute or unmute all players
         default: op
     idols.idols:
         description: Shows help and allows a reload
