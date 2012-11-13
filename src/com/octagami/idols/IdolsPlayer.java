@@ -94,6 +94,11 @@ public class IdolsPlayer {
 		return this.fireResist;
 	}
 	
+	public boolean canHeadshot() {
+		
+		return player.hasPermission("idols.headshot");
+	}
+	
 	public void enableFireResist(boolean value) {
 		
 		this.fireResist = value;
@@ -187,7 +192,7 @@ public class IdolsPlayer {
 		            	berserkTimerTaskId = -1;
 		            	
 		            	if ( player != null) {
-			            	player.sendMessage(ChatColor.GOLD + "Your berserker rage has subsided.");
+			            	player.sendMessage(ChatColor.RED + "Your berserker rage has subsided.");
 		            	} 	
 		            }  
 		            
@@ -248,41 +253,42 @@ public class IdolsPlayer {
 				
 			}
 			
-			radarTimerTaskId = plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, new RadarTask(plugin, player.getName(), blockId, distance), 60L, frequency * 20);
+			RadarTask radarTask = new RadarTask(plugin, player.getName(), blockId, distance, duration);
 			
-			// Create and run a new timer which will disable radar when it executes
-			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
-				
-	            public void run() { 
-	            	
-	            	try {
-	            		
-						Idols.getPlugin().getServer().getScheduler().cancelTask(radarTimerTaskId);
-						radarTimerTaskId = -1;
-						
-						if (player != null) {
-							player.sendMessage(ChatColor.GOLD + "Your mining intuition fades");
-						}
-						
-					} catch (IdolsNotLoadedException e) {
-						e.printStackTrace();
-					}
-	            	
-	            }  
-	            
-	        }, duration * 20);
+			radarTimerTaskId = plugin.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, radarTask, 60L, frequency * 20);
+			radarTask.setTaskID(radarTimerTaskId);
 			
+//			// Create and run a new timer which will disable radar when it executes
+//			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+//				
+//	            public void run() { 
+//	            	
+//	            	try {
+//	            		
+//						Idols.getPlugin().getServer().getScheduler().cancelTask(radarTimerTaskId);
+//						radarTimerTaskId = -1;
+//						
+//						if (player != null) {
+//							player.sendMessage(ChatColor.GOLD + "Your mining intuition fades");
+//						}
+//						
+//					} catch (IdolsNotLoadedException e) {
+//						e.printStackTrace();
+//					}
+//	            	
+//	            }  
+//	            
+//	        }, duration * 20);
 			
 			Idols.setAbilityCooldown(player.getName(), "radar", cooldown);
 				
-
 		} else {
 			
 			if (radarTimerTaskId >= 0) {
 				
 				plugin.getServer().getScheduler().cancelTask(radarTimerTaskId);
 				//plugin.getLogger().info("Manually canceling radar cooldown timer, id = " + radarTimerTaskId);
-				player.sendMessage(ChatColor.GOLD + "You disregard your mining intuition");
+				player.sendMessage(ChatColor.RED + "You disregard your mining intuition");
 				
 			} else {
 				

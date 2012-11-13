@@ -1,5 +1,9 @@
 package com.octagami.idols.task;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -21,13 +25,21 @@ public class RadarTask implements Runnable {
 	private int oreId = -1;
 	private int dist = 0;
 	
-  
-    public RadarTask(IdolsPlugin plugin, String playerName, int oreId, int dist) {
+	private int taskID = -1;
+
+	private Date expiration = null;
+	
+    public RadarTask(IdolsPlugin plugin, String playerName, int oreId, int dist, int duration) {
         
     	this.plugin = plugin;
     	this.playerName = playerName;
     	this.oreId = oreId;
     	this.dist = dist;
+    	
+    	Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.add(Calendar.SECOND, duration);
+        this.expiration = cal.getTime();
     }
 
     @Override
@@ -94,7 +106,26 @@ public class RadarTask implements Runnable {
 			}
 
 		}
-    	
+		
+		if (Util.getTimeRemaining( new Date(), expiration, TimeUnit.SECONDS) <= 0) {
+			
+			if (taskID > 0) {
+				plugin.getServer().getScheduler().cancelTask(taskID);
+				player.sendMessage(ChatColor.RED + "Your mining intuition fades");
+			}else {
+				plugin.getLogger().severe("Failed to cancel radar task because taskID was not set");
+			}
+				
+		}
+
     }
+
+	public int getTaskID() {
+		return taskID;
+	}
+
+	public void setTaskID(int taskID) {
+		this.taskID = taskID;
+	}
     
 }
