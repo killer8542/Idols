@@ -5,10 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import me.zford.jobs.container.Job;
-
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.EntityType;
 
 public class IdolsConfig {
 	
@@ -22,12 +21,11 @@ public class IdolsConfig {
 	public final String GENERAL_CONFIG_NAME = "generalConfig.yml";
 	public final String ENCHANT_CONFIG_NAME = "enchantsConfig.yml";
 	
+	public boolean berserkAllowInPvp = false;
 	public int berserkFrequency = 0;
 	public int berserkDuration = 30;
-	public double berserkCritMultiplier = 1.0;
+	public double berserkCritMultiplier = 1.25;
     
-	private ArrayList<Job> builderJobs = new ArrayList<Job>();
-	
 	public int fallImmunityDuration = 30;
 	
 	public int potionPollInterval = 4;
@@ -52,18 +50,18 @@ public class IdolsConfig {
 	public int homieCooldown = 3600;
 	
 	public int alertDelay = 8;
+	
+	public boolean headshotAllowInPvp = false;
+	public double headshotCritMultiplier = 1.25;
+	public double headshotAboveThreshold = 0.5;
+	public double headshotBelowThreshold = 0.2;
+	private ArrayList<EntityType> headshotMobs = new ArrayList<EntityType>();
     
     public boolean emotesEnabled = true;
     
 	public int emoteDistance = 10;
 	
 	private boolean disableSpawners = false;
-	
-	private boolean globalMute = false;
-	
-	private boolean joinMessageEnabled = true;
-	
-	private boolean leaveMessageEnabled = true;
   
     public IdolsConfig(IdolsPlugin plugin) {
         this.plugin = plugin;
@@ -74,37 +72,13 @@ public class IdolsConfig {
     	return disableSpawners;
     }
     
-    public boolean areJoinMessagesEnabled() {
-    	
-    	return joinMessageEnabled;
-    }
-    
-    public boolean areLeaveMessagesEnabled() {
-    	
-    	return leaveMessageEnabled;
-    }
-    
     public void setDisableSpawners(boolean value) {
     	
     	disableSpawners = value;
     }
-    
-    public boolean isGlobalMuteOn() {
-		return globalMute;
-	}
-
-	public void setGlobalMute(boolean globalMute) {
-		this.globalMute = globalMute;
-	}
-	
-	public ArrayList<Job> getBuilderJobs() {
-    	
-    	return builderJobs;
-    }
     	
     public void reload() {
-
-    	builderJobs.clear();
+    	
     	loadSettings();
     }
     
@@ -148,52 +122,6 @@ public class IdolsConfig {
         	conf.set("version", 0.1);
         configVersion = conf.getString("version");
         
-        
-        // Soldier
-        ConfigurationSection soldierSection = conf.getConfigurationSection("Soldier");
-        if (soldierSection == null) soldierSection = conf.createSection("Soldier");
-        
-        ConfigurationSection berserkSection  = soldierSection.getConfigurationSection("Berserk");
-        if (berserkSection == null) berserkSection = soldierSection.createSection("Berserk");
-        
-        if (!berserkSection.contains("frequency")) {
-        	berserkSection.set("frequency", 10);
-        }
-        berserkFrequency = berserkSection.getInt("frequency");
-        
-        if (!berserkSection.contains("duration")) {
-        	berserkSection.set("duration", 30);
-        }
-        berserkDuration = berserkSection.getInt("duration");
-        
-        if (!berserkSection.contains("crit-multiplier")) {
-        	berserkSection.set("crit-multiplier", 1.25);
-        }
-        berserkCritMultiplier = berserkSection.getDouble("crit-multiplier");
-        
-        // Builder
-        ConfigurationSection builderSection = conf.getConfigurationSection("Builder");
-        if (builderSection == null) builderSection = conf.createSection("Builder");
-
-        if (builderSection.getStringList("job-names").isEmpty()) 
-        	builderSection.set("job-names", new ArrayList<String>( Arrays.asList("Builder") ) );
-        
-        for (String jobName : builderSection.getStringList("job-names")) {
-        	
-        	Job builderJob = plugin.getJobsHook().getJobsCore().getJob(jobName);
-        	
-        	if (builderJob != null)
-        		builderJobs.add(builderJob);
-        }
-         
-        ConfigurationSection fallImmunitySection  = builderSection.getConfigurationSection("Fall-Immunity");
-        if (fallImmunitySection == null) fallImmunitySection = builderSection.createSection("Fall-Immunity");
-        
-        if (!fallImmunitySection.contains("duration")) {
-        	fallImmunitySection.set("duration", 60);
-        }
-        fallImmunityDuration = fallImmunitySection.getInt("duration");
-        
         // Alchemist
         ConfigurationSection alchemistSection = conf.getConfigurationSection("Alchemist");
         if (alchemistSection == null) alchemistSection = conf.createSection("Alchemist");
@@ -205,7 +133,6 @@ public class IdolsConfig {
         
         ConfigurationSection potionSection  = alchemistSection.getConfigurationSection("Potion");
         if (potionSection == null) potionSection = alchemistSection.createSection("Potion");
-        
         
         ConfigurationSection smoothSection  = potionSection.getConfigurationSection("Smooth");
         if (smoothSection == null) smoothSection = potionSection.createSection("Smooth");
@@ -220,7 +147,6 @@ public class IdolsConfig {
         }
         smoothDuration = smoothSection.getInt("duration");
         
-        
         ConfigurationSection suaveSection  = potionSection.getConfigurationSection("Suave");
         if (suaveSection == null) suaveSection = potionSection.createSection("Suave");
 
@@ -234,7 +160,6 @@ public class IdolsConfig {
         }
         suaveDuration = suaveSection.getInt("duration");
        
-        
         ConfigurationSection debonairSection  = potionSection.getConfigurationSection("Debonair");
         if (debonairSection == null) debonairSection = potionSection.createSection("Debonair");
 
@@ -247,10 +172,20 @@ public class IdolsConfig {
         	debonairSection.set("duration", 900);
         }
         debonairDuration = debonairSection.getInt("duration");
+        
+        // Builder
+        ConfigurationSection builderSection = conf.getConfigurationSection("Builder");
+        if (builderSection == null) builderSection = conf.createSection("Builder");
          
+        ConfigurationSection fallImmunitySection  = builderSection.getConfigurationSection("Fall-Immunity");
+        if (fallImmunitySection == null) fallImmunitySection = builderSection.createSection("Fall-Immunity");
+        
+        if (!fallImmunitySection.contains("duration")) {
+        	fallImmunitySection.set("duration", 60);
+        }
+        fallImmunityDuration = fallImmunitySection.getInt("duration");
         
         // Miner
-        
         ConfigurationSection minerSection = conf.getConfigurationSection("Miner");
         if (minerSection == null) minerSection = conf.createSection("Miner");
         
@@ -277,8 +212,79 @@ public class IdolsConfig {
         }
         radarCooldown = radarSection.getInt("cooldown");
         
-        // Misc
+        // Soldier
+        ConfigurationSection soldierSection = conf.getConfigurationSection("Soldier");
+        if (soldierSection == null) soldierSection = conf.createSection("Soldier");
         
+        ConfigurationSection berserkSection  = soldierSection.getConfigurationSection("Berserk");
+        if (berserkSection == null) berserkSection = soldierSection.createSection("Berserk");
+        
+        if (!berserkSection.contains("allow-in-pvp")) {
+        	berserkSection.set("allow-in-pvp", false);
+        }
+        berserkAllowInPvp = berserkSection.getBoolean("allow-in-pvp");
+        
+        if (!berserkSection.contains("frequency")) {
+        	berserkSection.set("frequency", 10);
+        }
+        berserkFrequency = berserkSection.getInt("frequency");
+        
+        if (!berserkSection.contains("duration")) {
+        	berserkSection.set("duration", 30);
+        }
+        berserkDuration = berserkSection.getInt("duration");
+        
+        if (!berserkSection.contains("crit-multiplier")) {
+        	berserkSection.set("crit-multiplier", 1.25);
+        }
+        berserkCritMultiplier = berserkSection.getDouble("crit-multiplier");
+        
+        // Woodsman
+        ConfigurationSection woodsmanSection = conf.getConfigurationSection("Woodsman");
+        if (woodsmanSection == null) woodsmanSection = conf.createSection("Woodsman");
+
+        ConfigurationSection headshotSection  = woodsmanSection.getConfigurationSection("Headshot");
+        if (headshotSection == null) headshotSection = woodsmanSection.createSection("Headshot");
+        
+        if (!headshotSection.contains("allow-in-pvp")) {
+        	headshotSection.set("allow-in-pvp", false);
+        }
+        headshotAllowInPvp = headshotSection.getBoolean("allow-in-pvp");
+        
+        if (!headshotSection.contains("crit-multiplier")) {
+        	headshotSection.set("crit-multiplier", 1.25);
+        }
+        headshotCritMultiplier = headshotSection.getDouble("crit-multiplier");
+        
+        if (!headshotSection.contains("above-threshold")) {
+        	headshotSection.set("above-threshold", 0.5);
+        }
+        headshotAboveThreshold = headshotSection.getDouble("above-threshold");
+        
+        if (!headshotSection.contains("below-threshold")) {
+        	headshotSection.set("below-threshold", 0.2);
+        }
+        headshotBelowThreshold = headshotSection.getDouble("below-threshold");
+        
+        if (headshotSection.getStringList("headshot-mobs").isEmpty()) 
+        	headshotSection.set("headshot-mobs", new ArrayList<String>( Arrays.asList("Zombie", "Skeleton", "Creeper") ) );
+        
+        for (String mobName : headshotSection.getStringList("headshot-mobs")) {
+        	
+            EntityType entity = EntityType.fromName(mobName);
+            if (entity == null) {
+                try {
+                    entity = EntityType.valueOf(mobName.toUpperCase());
+                } catch (IllegalArgumentException e) {}
+            }
+            
+            if (entity != null && entity.isAlive())
+                headshotMobs.add(entity);
+            else
+            	plugin.getLogger().warning("Invalid entity type: " + mobName);
+        }
+        
+        // Misc
         ConfigurationSection miscSection = conf.getConfigurationSection("Misc");
         if (miscSection == null) miscSection = conf.createSection("Misc");
         
@@ -311,19 +317,6 @@ public class IdolsConfig {
         }
         emoteDistance = emotesSection.getInt("distance");
         
-        ConfigurationSection chatSection  = miscSection.getConfigurationSection("Chat");
-        if (chatSection == null) chatSection = miscSection.createSection("Chat");
-        
-        if (!chatSection.contains("join-message")) {
-        	chatSection.set("join-message", true);
-        }
-        joinMessageEnabled = chatSection.getBoolean("join-message");
-        
-        if (!chatSection.contains("leave-message")) {
-        	chatSection.set("leave-message", true);
-        }
-        leaveMessageEnabled = chatSection.getBoolean("leave-message");
-        
         try {
             conf.save(f);
         } catch (IOException e) {
@@ -332,7 +325,4 @@ public class IdolsConfig {
         
     }
 
-	
-    
-    
 }

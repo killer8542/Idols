@@ -2,7 +2,7 @@ package com.octagami.idols.listener;
 
 import me.zford.jobs.bukkit.actions.BlockActionInfo;
 import me.zford.jobs.container.ActionType;
-import me.zford.jobs.container.Job;
+import me.zford.jobs.container.JobProgression;
 import me.zford.jobs.container.JobsPlayer;
 
 import org.bukkit.ChatColor;
@@ -49,12 +49,12 @@ public class BlockListener implements Listener {
 			
 			if (worker == null) return;
 			
-        	for (Job job : plugin.getIdolsConfig().getBuilderJobs()) {
+        	for (JobProgression job : worker.getJobProgression()) {
 
-				if ( !worker.isInJob(job) )
+				if ( !job.getJob().getbaseJob().equals("Builder") )
 					continue;
 
-    			Double blockXP = job.getExperience(new BlockActionInfo(event.getBlock(), ActionType.PLACE), 1, 1);
+    			Double blockXP = job.getJob().getExperience(new BlockActionInfo(event.getBlock(), ActionType.PLACE), 1, 1);
     				
     			if (blockXP != null && blockXP > 0) {
     				
@@ -70,7 +70,6 @@ public class BlockListener implements Listener {
         }
  
     }
-    
     
     @EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
     public void onBlockBreak(BlockBreakEvent event) {

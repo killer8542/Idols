@@ -1,8 +1,10 @@
 package com.octagami.idols.listener;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -50,12 +52,66 @@ public class EntityListener implements Listener {
 		
 		if (!plugin.isEnabled())
 			return;
-	
-		if (event.getDamager() instanceof Player) {
+
+		if (event.getDamager() instanceof Projectile) {
+			
+			Projectile projectile = (Projectile) event.getDamager();
+			
+			if ((projectile.getShooter() instanceof Player) &&
+				(event.getEntity() instanceof LivingEntity)) {
+				
+					Player attacker = (Player)projectile.getShooter();
+					
+					if (!IdolsPlayerManager.getPlayer(attacker).canHeadshot())
+						return;
+					
+					LivingEntity defender = (LivingEntity)event.getEntity();
+					
+					if ((defender instanceof Player) && (!plugin.getIdolsConfig().headshotAllowInPvp))
+						return;
+					
+					Double eyeHeight = defender.getEyeHeight(true);
+					Location entityLoc = defender.getLocation();
+					
+					Location arrowLoc = projectile.getLocation();
+					entityLoc.setY(entityLoc.getY() + eyeHeight + 0.6);
+					
+					if (arrowLoc.getY() <= entityLoc.getY() + plugin.getIdolsConfig().headshotAboveThreshold && 
+						arrowLoc.getY() >= entityLoc.getY() - plugin.getIdolsConfig().headshotBelowThreshold ) {
+						
+						double newDamageFloat = (double)event.getDamage() * plugin.getIdolsConfig().headshotCritMultiplier;
+						
+						int newDamage = (int)newDamageFloat;
+						
+						if (plugin.getIdolsConfig().DEBUG) {
+							
+							String arrowZ = String.format("%.2f", arrowLoc.getY());
+							String headZ = String.format("%.2f", entityLoc.getY());
+							attacker.sendMessage("Arrow: " + arrowZ  + "MobHead: " + headZ); 
+						}
+
+						attacker.sendMessage(ChatColor.RED + "HEADSHOT");
+						
+						if (IdolsPlayerManager.getPlayer(attacker).canSeeDamage())
+							attacker.sendMessage(ChatColor.RED + "You have crit for " + Integer.toString(newDamage) + " damage!" );
+						
+						event.setDamage(newDamage);
+						
+					} else {
+						
+						if (IdolsPlayerManager.getPlayer(attacker).canSeeDamage())
+							attacker.sendMessage(ChatColor.GOLD + "You have hit for " + Integer.toString(event.getDamage()) + " damage!" );
+					}
+			}
+
+		} else if (event.getDamager() instanceof Player) {
 			
 			Player player = (Player) event.getDamager();
 			
 			if (IdolsPlayerManager.getPlayer(player).isBerserk()) {
+				
+				if ((event.getEntity() instanceof Player) && (!plugin.getIdolsConfig().berserkAllowInPvp))
+					return;
 				
 				double newDamageFloat = (double)event.getDamage() * plugin.getIdolsConfig().berserkCritMultiplier;
 				
