@@ -12,7 +12,7 @@ public class IdolsPlayerManager {
 		
 		if (players.containsKey(player.getName())) {
 			
-			IdolsPlayerManager.getPlayer(player).cancelTasks();
+			IdolsPlayerManager.getPlayer(player).hasQuit();
 			IdolsPlayerManager.players.remove(player.getName());
 		}
 	}
@@ -20,7 +20,7 @@ public class IdolsPlayerManager {
 	public static void playerDied(Player player) {
 		
 		if (players.containsKey(player.getName())) {
-			IdolsPlayerManager.getPlayer(player).cancelTasks();
+			IdolsPlayerManager.getPlayer(player).hasDied();
 		}
 	}
 

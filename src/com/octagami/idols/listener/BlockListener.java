@@ -51,7 +51,7 @@ public class BlockListener implements Listener {
 			
         	for (JobProgression job : worker.getJobProgression()) {
 
-				if ( !job.getJob().getbaseJob().equals("Builder") )
+				if ( !job.getJob().getName().equals("Builder") && !job.getJob().getbaseJob().equals("Builder") )
 					continue;
 
     			Double blockXP = job.getJob().getExperience(new BlockActionInfo(event.getBlock(), ActionType.PLACE), 1, 1);

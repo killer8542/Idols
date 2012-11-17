@@ -1,5 +1,8 @@
 package com.octagami.idols.listener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
@@ -12,10 +15,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
@@ -24,12 +29,17 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import com.octagami.idols.Idols;
 import com.octagami.idols.IdolsPlayerManager;
 import com.octagami.idols.IdolsPlugin;
+import com.octagami.idols.util.EntityEquipment;
+import com.octagami.idols.util.Namer;
+import com.octagami.idols.util.PhantomItem;
+import com.octagami.idols.util.Util;
 
 @SuppressWarnings("unused")
 public class PlayerListener implements Listener {
@@ -41,12 +51,88 @@ public class PlayerListener implements Listener {
 		this.plugin = plugin;
 	}
 	
-	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled=true)
-    public void onPlayerDeath(PlayerDeathEvent event) {
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onPlayerDeath(PlayerDeathEvent event) {
+		
+		if(!plugin.isEnabled()) 
+			return;
+		
+		Player player = event.getEntity();
+		
+		PlayerInventory inventory = player.getInventory();
+
+		if (IdolsPlayerManager.getPlayer(player).isInnateArmored()) {
+			
+			ItemStack helmet = inventory.getHelmet();
+			ItemStack chestplate = inventory.getChestplate();
+			ItemStack leggings = inventory.getLeggings();
+			ItemStack boots = inventory.getBoots();
+			
+			if (helmet != null && Namer.itemIsNamed(helmet, PhantomItem.getLabel(helmet.getType())))
+				event.getDrops().remove(helmet);
+			if (chestplate != null && Namer.itemIsNamed(chestplate, PhantomItem.getLabel(chestplate.getType())))
+				event.getDrops().remove(chestplate);
+			if (leggings != null && Namer.itemIsNamed(leggings, PhantomItem.getLabel(leggings.getType())))
+				event.getDrops().remove(leggings);
+			if (boots != null && Namer.itemIsNamed(boots, PhantomItem.getLabel(boots.getType())) ) {
+				event.getDrops().remove(boots);
+			}
+				
+		}
 		
 		IdolsPlayerManager.playerDied(event.getEntity());
+		
 	}
 	
+	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
+	public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+
+		if (!plugin.isEnabled()) return;
+
+		Player player = event.getPlayer();
+
+		if (player == null) return;
+
+		if (!(event.getRightClicked() instanceof LivingEntity))
+			return;
+		
+		LivingEntity target = (LivingEntity)event.getRightClicked();
+
+		if (target.getType().equals(EntityType.ZOMBIE) || target.getType().equals(EntityType.SKELETON) ) {
+
+			if (!player.hasPermission("idols.equip.monster"))
+				return;
+			
+			if (player.getItemInHand() != null) {
+				
+				boolean success = false;
+				ItemStack playerItem = player.getItemInHand();
+				
+				if (Util.isWeapon(playerItem) || Util.isTool(playerItem)) {
+					EntityEquipment.setWeapon(target, playerItem);
+					success = true;
+				}else if (Util.isHelmet(playerItem)) {
+					EntityEquipment.setHelmet(target, playerItem);
+					success = true;
+				}else if (Util.isChestplate(playerItem)) {
+					EntityEquipment.setChestplate(target, playerItem);
+					success = true;
+				}else if (Util.isLeggings(playerItem)) {
+					EntityEquipment.setPants(target, playerItem);
+					success = true;
+				}else if (Util.isBoots(playerItem)) {
+					EntityEquipment.setBoots(target, playerItem);
+					success = true;
+				}
+
+				if (success)
+					player.setItemInHand(new ItemStack(Material.AIR));
+			}
+			
+		}
+		
+	}
+		
 	@EventHandler(priority = EventPriority.LOW)
     public void onPlayerInteract(PlayerInteractEvent event) {
 

@@ -1,22 +1,35 @@
 package com.octagami.idols.listener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType.SlotType;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 import com.octagami.idols.Idols;
+import com.octagami.idols.IdolsPlayer;
 import com.octagami.idols.IdolsPlayerManager;
 import com.octagami.idols.IdolsPlugin;
+import com.octagami.idols.util.EntityEquipment;
+import com.octagami.idols.util.PhantomItem;
+import com.octagami.idols.util.Namer;
 import com.octagami.idols.util.Util;
 
 public class EntityListener implements Listener {
@@ -27,24 +40,251 @@ public class EntityListener implements Listener {
 
 		this.plugin = plugin;
 	}
-
+	
 	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-	public void onCreatureSpawn(CreatureSpawnEvent event) {
+	public void onEntityDamage(EntityDamageEvent event) {
+		
+		if(!plugin.isEnabled()) 
+			return;
+		
+//		if (plugin.getIdolsConfig().DEBUG)
+//			plugin.getLogger().info("EntityDamageEvent - Original damage: " + event.getDamage());
 
-		if (!plugin.isEnabled())
+		if ( !(event.getEntity() instanceof Player) )
 			return;
 
-		if (!(event.getEntity() instanceof LivingEntity))
-			return;
+		Player player = (Player)event.getEntity();
 
-		if (!event.getSpawnReason().equals(SpawnReason.SPAWNER))
-			return;
+		if (event.getCause().equals(DamageCause.FALL)) {
+
+			if (IdolsPlayerManager.getPlayer(player).canBeFallImmune() &&
+				IdolsPlayerManager.getPlayer(player).isFallImmune() &&
+				event.getDamage() >= player.getHealth()) {
+
+				player.sendMessage(ChatColor.RED + "A committed builder fears no heights!");
+				
+				Idols.emote(player, " miraculously avoids falling to his death!");
+					
+				event.setCancelled(true);
+
+			}
+
+		}else if (event.getCause().equals(DamageCause.FIRE_TICK)) {
 			
-		if (!plugin.getIdolsConfig().areSpawnersDisabled())
+			if (IdolsPlayerManager.getPlayer(player).isFireResist()) {
+				
+				IdolsPlayerManager.getPlayer(player).enableFireResist(false);
+				
+				event.setCancelled(true);
+			}
+
+		}
+
+	}
+	
+	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+	public void onEntityDamageMonitor(EntityDamageEvent event) {
+		
+		if(!plugin.isEnabled()) 
 			return;
 
-		event.setCancelled(true);
+		if ( !(event.getEntity() instanceof Player) )
+			return;
+		
+		final Player player = (Player)event.getEntity();
+		
+//		if (plugin.getIdolsConfig().DEBUG) {
+//
+//			final LivingEntity entity = (LivingEntity)event.getEntity();
+//			final int finalDamage =  event.getDamage();
+//			final int entityHealth = entity.getHealth();
+//			final EntityDamageEvent aEvent = event;
+//			
+//			plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+//
+//				public void run() {
+//					
+//					double armorMultiplier = DamageCalculator.getArmourMultiplier(aEvent, player);
+//					double epfMultiplier =  DamageCalculator.getEPFMultiplier(aEvent, player);
+//					
+//					int damageAfterArmor = (int)((double)finalDamage * armorMultiplier * epfMultiplier);
+//							
+//					plugin.getLogger().info("EntityDamageEvent - Modified damage: " + finalDamage);
+//					plugin.getLogger().info("EntityDamageEvent - Armor multiplier: " + armorMultiplier);
+//					plugin.getLogger().info("EntityDamageEvent - Enchant multiplier: " + epfMultiplier);
+//					plugin.getLogger().info("EntityDamageEvent - After armor: " + damageAfterArmor);
+//					plugin.getLogger().info("EntityDamageEvent - Entity health: " +entityHealth);
+//					plugin.getLogger().info("EntityDamageEvent - Final health: " + entity.getHealth());
+//					
+//					if (entity.getHealth() == entityHealth - damageAfterArmor)
+//						plugin.getLogger().info("PASS");
+//					else
+//						plugin.getLogger().info("FAIL");
+//						
+//					
+//					plugin.getLogger().info("");
+//				}
+//
+//			}, 0L);
+//				
+//		}
+		
+		if (event.getCause().equals(DamageCause.ENTITY_ATTACK) || event.getCause().equals(DamageCause.PROJECTILE)) {
 
+			IdolsPlayer iPlayer = IdolsPlayerManager.getPlayer(player);
+			
+			if (iPlayer.canBerserk()) {
+
+				int nextInt = Idols.random.nextInt(100);
+
+				if (nextInt < plugin.getIdolsConfig().berserkFrequency) {
+
+					if (!iPlayer.isBerserk()) {
+
+						player.sendMessage(ChatColor.RED + "You go into a berserker rage!");
+
+						Idols.emote(player, " goes into a berserker rage!");
+
+					} else {
+						player.sendMessage(ChatColor.RED + "You berserker rage has been extended!");
+					}
+
+					iPlayer.enableBerserk(true);
+				}
+
+			}
+			
+			if (iPlayer.canInnateArmor()) {
+				
+				///final CraftPlayerInventory cInv = (CraftPlayer)player.getInventory();
+				final CraftPlayer cPlayer = (CraftPlayer)player;
+				
+				final PlayerInventory inventory = cPlayer.getInventory();
+
+				final ItemStack helmet = inventory.getHelmet();
+				final ItemStack chestplate = inventory.getChestplate();
+				final ItemStack leggings = inventory.getLeggings();
+				final ItemStack boots = inventory.getBoots();
+				
+				boolean innateArmorTriggered = false;
+				
+				if (helmet == null) {
+					
+					ItemStack fakeHelmet = new ItemStack(iPlayer.getInnateArmorLevel("helmet"));
+					fakeHelmet = Namer.setName(fakeHelmet, PhantomItem.getLabel(fakeHelmet.getType()));
+					inventory.setHelmet(fakeHelmet);
+					innateArmorTriggered = true;
+				}
+				
+				if (chestplate == null) {
+					ItemStack fakeChestplate = new ItemStack(iPlayer.getInnateArmorLevel("chestplate"));
+					fakeChestplate = Namer.setName(fakeChestplate, PhantomItem.getLabel(fakeChestplate.getType()));
+					inventory.setChestplate(fakeChestplate);
+					innateArmorTriggered = true;
+				}
+				
+				if (leggings == null) {
+					ItemStack fakeLeggings = new ItemStack(iPlayer.getInnateArmorLevel("leggings"));
+					fakeLeggings = Namer.setName(fakeLeggings, PhantomItem.getLabel(fakeLeggings.getType()));
+					inventory.setLeggings(fakeLeggings);
+					innateArmorTriggered = true;
+				}
+				
+				if (boots == null) {
+					ItemStack fakeBoots = new ItemStack(iPlayer.getInnateArmorLevel("boots"));
+					fakeBoots = Namer.setName(fakeBoots, PhantomItem.getLabel(fakeBoots.getType()));
+					inventory.setBoots(fakeBoots);
+					innateArmorTriggered = true;
+				}
+				
+				if (innateArmorTriggered) {
+
+					IdolsPlayerManager.getPlayer(player).enableInnateArmor(true);
+
+					plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+
+						public void run() {
+
+							boolean innateArmorFade = false;
+
+							if (helmet == null) {
+								inventory.setHelmet(new ItemStack(Material.AIR));
+								innateArmorFade = true;
+							}
+							if (chestplate == null) {
+								inventory.setChestplate(new ItemStack(Material.AIR));
+								innateArmorFade = true;
+							}
+							if (leggings == null) {
+								inventory.setLeggings(new ItemStack(Material.AIR));
+								innateArmorFade = true;
+							}
+							if (boots == null) {
+								inventory.setBoots(new ItemStack(Material.AIR));
+								innateArmorFade = true;
+							}
+
+							if (innateArmorFade)
+								IdolsPlayerManager.getPlayer(player).enableInnateArmor(false);
+						}
+
+					}, plugin.getIdolsConfig().innateArmorDuration);
+
+				}
+
+			}
+
+		} else if (event.getCause().equals(DamageCause.FIRE_TICK)) {
+
+			if (IdolsPlayerManager.getPlayer(player).canBeFireResistant() && !IdolsPlayerManager.getPlayer(player).isFireResist())
+
+				if (plugin.getIdolsConfig().DEBUG)
+					plugin.getLogger().info("Took fire damage. Enabling immunity to negate next fire tick");
+
+			IdolsPlayerManager.getPlayer(player).enableFireResist(true);
+		}
+
+	} 
+	
+	@EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+	public void onInventoryClick(InventoryClickEvent event) {
+		
+		if (!plugin.isEnabled()) return;
+		
+		if (event.getSlotType() == SlotType.ARMOR) {
+			
+			if (event.getWhoClicked() instanceof Player) {
+				
+				final Player player = (Player)event.getWhoClicked();
+				
+				if (IdolsPlayerManager.getPlayer(player).isInnateArmored()) {
+					
+					plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+
+						public void run() {
+
+							PlayerInventory inventory = player.getInventory();
+
+							for (int i = 0; i <= 8; i++) {
+
+								ItemStack item = inventory.getItem(i);
+								if (item != null && Namer.itemIsNamed(item, PhantomItem.getLabel(item.getType()))) {
+									inventory.setItem(i, new ItemStack(Material.AIR));
+								}
+								
+							}
+							
+						}
+						
+					}, 0L);
+
+					event.setCancelled(true);
+				}
+					
+			}
+
+		}
+			
 	}
 	
 	@EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
@@ -52,7 +292,7 @@ public class EntityListener implements Listener {
 		
 		if (!plugin.isEnabled())
 			return;
-
+	
 		if (event.getDamager() instanceof Projectile) {
 			
 			Projectile projectile = (Projectile) event.getDamager();
@@ -67,9 +307,13 @@ public class EntityListener implements Listener {
 					
 					LivingEntity defender = (LivingEntity)event.getEntity();
 					
-					if ((defender instanceof Player) && (!plugin.getIdolsConfig().headshotAllowInPvp))
+					if (defender instanceof Player) {
+						if (!plugin.getIdolsConfig().headshotAllowInPvp)
+							return;
+					} else if (!plugin.getIdolsConfig().isHeadShotMob(defender.getType())) {
 						return;
-					
+					}
+						
 					Double eyeHeight = defender.getEyeHeight(true);
 					Location entityLoc = defender.getLocation();
 					
@@ -83,32 +327,58 @@ public class EntityListener implements Listener {
 						
 						int newDamage = (int)newDamageFloat;
 						
-						if (plugin.getIdolsConfig().DEBUG) {
-							
-							String arrowZ = String.format("%.2f", arrowLoc.getY());
-							String headZ = String.format("%.2f", entityLoc.getY());
-							attacker.sendMessage("Arrow: " + arrowZ  + "MobHead: " + headZ); 
-						}
+//						if (plugin.getIdolsConfig().DEBUG) {
+//							
+//							String arrowZ = String.format("%.2f", arrowLoc.getY());
+//							String headZ = String.format("%.2f", entityLoc.getY());
+//							attacker.sendMessage("Arrow: " + arrowZ  + " MobHead: " + headZ); 
+//						}
 
-						attacker.sendMessage(ChatColor.RED + "HEADSHOT");
-						
-						if (IdolsPlayerManager.getPlayer(attacker).canSeeDamage())
-							attacker.sendMessage(ChatColor.RED + "You have crit for " + Integer.toString(newDamage) + " damage!" );
+						attacker.sendMessage(ChatColor.RED + "HEADSHOT!");
+
+						if (defender.getType().equals(EntityType.ZOMBIE) || 
+								defender.getType().equals(EntityType.SKELETON) ||
+								defender.getType().equals(EntityType.CREEPER)) {
+							
+							int nextInt = Idols.random.nextInt(100);
+
+							if (nextInt < plugin.getIdolsConfig().headshotHeadDropChance) {
+								
+								ItemStack head = new ItemStack(Material.SKULL_ITEM);
+								
+								if (defender.getType().equals(EntityType.SKELETON))
+									head.setDurability((short)0);
+								else if (defender.getType().equals(EntityType.ZOMBIE))
+									head.setDurability((short)2);
+								else if (defender.getType().equals(EntityType.CREEPER))
+									head.setDurability((short)4);
+								
+								attacker.sendMessage(ChatColor.RED + "Your well aimed shot decapitates your foe!");
+								defender.getWorld().dropItemNaturally(defender.getLocation(), head);
+								defender.setHealth(0); 
+							}
+							
+						}
 						
 						event.setDamage(newDamage);
 						
+//						if (plugin.getIdolsConfig().DEBUG)
+//							plugin.getLogger().info("EntityDamageEvent - Modified damage: " + newDamage);
+						
+						Idols.showDamage(attacker, newDamage, false);
+
 					} else {
 						
-						if (IdolsPlayerManager.getPlayer(attacker).canSeeDamage())
-							attacker.sendMessage(ChatColor.GOLD + "You have hit for " + Integer.toString(event.getDamage()) + " damage!" );
+						Idols.showDamage(attacker, event.getDamage(), false);
 					}
+					
 			}
 
 		} else if (event.getDamager() instanceof Player) {
 			
-			Player player = (Player) event.getDamager();
+			Player attacker = (Player) event.getDamager();
 			
-			if (IdolsPlayerManager.getPlayer(player).isBerserk()) {
+			if (IdolsPlayerManager.getPlayer(attacker).isBerserk()) {
 				
 				if ((event.getEntity() instanceof Player) && (!plugin.getIdolsConfig().berserkAllowInPvp))
 					return;
@@ -116,125 +386,141 @@ public class EntityListener implements Listener {
 				double newDamageFloat = (double)event.getDamage() * plugin.getIdolsConfig().berserkCritMultiplier;
 				
 				int newDamage = (int)newDamageFloat;
-				
-				if (IdolsPlayerManager.getPlayer(player).canSeeDamage())
-					player.sendMessage(ChatColor.RED + "You have crit for " + Integer.toString(newDamage) + " damage!" );
-				
+
 				event.setDamage(newDamage);
+				
+				Idols.showDamage(attacker, newDamage, false);
 				
 			} else {
 				
-				if (IdolsPlayerManager.getPlayer(player).canSeeDamage())
-					player.sendMessage(ChatColor.GOLD + "You have hit for " + Integer.toString(event.getDamage()) + " damage!" );
+				Idols.showDamage(attacker, event.getDamage(), false);
 			}
 			
 		}	
 		
 	}
-
-	@EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-	public void onEntityDamage(EntityDamageEvent event) {
-		
-		if(!plugin.isEnabled()) 
-			return;
-
-		if (event.getEntity() instanceof Player) {
-
-			Player player = (Player) event.getEntity();
-
-			DamageCause cause = event.getCause();
-
-			if (cause.equals(DamageCause.FALL)) {
-
-				if (IdolsPlayerManager.getPlayer(player).canBeFallImmune() &&
-					IdolsPlayerManager.getPlayer(player).isFallImmune() &&
-					event.getDamage() >= player.getHealth()) {
-
-					player.sendMessage(ChatColor.GOLD + "A committed builder fears no heights!");
-					
-					if (plugin.getIdolsConfig().emotesEnabled) {
-						
-						for (Player y : player.getWorld().getPlayers()) {
-		                    if (y != player && Util.isNear(player.getLocation(), y.getLocation(), plugin.getIdolsConfig().emoteDistance)) {
-		                        y.sendMessage(ChatColor.RED + player.getName() + " miraculously avoids falling to his death!");
-		                    }
-		                }
-					}
-					
-					event.setCancelled(true);
-
-				}
-
-			} 
-			
-		}
-		
-	}
-		
+	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-	public void onEntityDamageMonitor(EntityDamageEvent event) {
+	public void onEntityDeath(EntityDeathEvent event) {
 		
 		if(!plugin.isEnabled()) 
 			return;
 		
-		if (event.getEntity() instanceof Player) {
+		LivingEntity livingEntity = event.getEntity();
+		
+		if (livingEntity.getType().equals(EntityType.ZOMBIE) || 
+			livingEntity.getType().equals(EntityType.SKELETON) ||
+			livingEntity.getType().equals(EntityType.CREEPER)) {
 			
-			Player player = (Player) event.getEntity();
-
-			DamageCause cause = event.getCause();
-
-			if (cause.equals(DamageCause.ENTITY_ATTACK) || cause.equals(DamageCause.PROJECTILE)) {
+			if (!(livingEntity.getKiller() instanceof Player))
+				return;
+			
+			Player player = livingEntity.getKiller();
+			IdolsPlayer iPlayer = IdolsPlayerManager.getPlayer(player);
+			
+			if (!livingEntity.getLastDamageCause().getCause().equals(DamageCause.ENTITY_ATTACK))
+				return; 
+			
+			if (!Util.isWeapon(player.getItemInHand()))
+				return;
+			
+			List<ItemStack> drops = event.getDrops();
+			
+			if (iPlayer.canBerserk() && iPlayer.isBerserk()) {
 				
-				if (IdolsPlayerManager.getPlayer(player).canBerserk()) {
-					
-					int nextInt = Idols.random.nextInt(100);
-					
-					if (nextInt < plugin.getIdolsConfig().berserkFrequency) {
-					    
-						if (!IdolsPlayerManager.getPlayer(player).isBerserk()) {
-							player.sendMessage(ChatColor.GOLD + "You go into a berserker rage!");
-							
-							if (plugin.getIdolsConfig().emotesEnabled) {
-								
-								for (Player y : player.getWorld().getPlayers()) {
-				                    if (y != player && Util.isNear(player.getLocation(), y.getLocation(), plugin.getIdolsConfig().emoteDistance)) {
-				                        y.sendMessage(ChatColor.RED + player.getName() + " goes into a berserker rage!");
-				                    }
-				                }
-							}
-							
-							
-						} else {
-							player.sendMessage(ChatColor.GOLD + "You berserker rage has been extended!");
-						}
-						
-						IdolsPlayerManager.getPlayer(player).enableBerserk(true);
-						
-					}
-					
-				}
-					
-			} else if (cause.equals(DamageCause.FIRE_TICK)) {
-				
-				if (IdolsPlayerManager.getPlayer(player).canBeFireResistant()) {
-					
-					if (IdolsPlayerManager.getPlayer(player).isFireResist()) {
-						event.setCancelled(true);
-						IdolsPlayerManager.getPlayer(player).enableFireResist(false);
-					}else {
-						
-						if (plugin.getIdolsConfig().DEBUG)
-							plugin.getLogger().info("Took fire damage. Enabling immunity to negate next fire tick");
-							
-						IdolsPlayerManager.getPlayer(player).enableFireResist(true);
-					}
+				int nextInt = Idols.random.nextInt(100);
 
+				if (nextInt < plugin.getIdolsConfig().berserkHeadDropChance) {
+					
+					ItemStack head = new ItemStack(Material.SKULL_ITEM);
+					
+					if (livingEntity.getType().equals(EntityType.SKELETON))
+						head.setDurability((short)0);
+					else if (livingEntity.getType().equals(EntityType.ZOMBIE))
+						head.setDurability((short)2);
+					else if (livingEntity.getType().equals(EntityType.CREEPER))
+						head.setDurability((short)4);
+					
+					player.sendMessage(ChatColor.RED + "You channel your rage and decapitate your foe!");
+					drops.add(head);
 				}
 				
 			}
 			
+			if (livingEntity.getType().equals(EntityType.CREEPER))
+				return;
+			
+			if (iPlayer.canArmorBreaker()) {
+				
+				int nextInt = Idols.random.nextInt(100);
+
+				if (nextInt < plugin.getIdolsConfig().armorBreakerChance) {
+					
+					ArrayList<ItemStack> possibleDrops = new ArrayList<ItemStack>();
+					
+					ItemStack mobHelmet = EntityEquipment.getHelmet(livingEntity);
+					ItemStack mobChestplate = EntityEquipment.getChestplate(livingEntity);
+					ItemStack mobLeggings = EntityEquipment.getPants(livingEntity);
+					ItemStack mobBoots = EntityEquipment.getBoots(livingEntity);
+					
+					if (mobHelmet != null) {
+						possibleDrops.add(mobHelmet);
+					}
+					
+					if (mobChestplate != null) {
+						possibleDrops.add(mobChestplate);
+					}
+					
+					if (mobLeggings != null) {
+						possibleDrops.add(mobLeggings);
+					}	
+					
+					if (mobBoots != null) {
+						possibleDrops.add(mobBoots);
+					}
+					
+					if (possibleDrops.size() > 0) {
+						
+						int dropIndex = Idols.random.nextInt(possibleDrops.size());
+						
+						for (ItemStack drop : drops){
+							if (Util.isArmor(drop))
+								drops.remove(drop);
+						}
+						
+						drops.add(possibleDrops.get(dropIndex));
+						player.sendMessage(ChatColor.RED + "You shatter the armor of your foe!"); 
+						return;
+					}
+					
+				}
+
+			}
+
+			if (iPlayer.canDisarm() && (EntityEquipment.getWeapon(livingEntity) != null)) {
+				
+				int nextInt = Idols.random.nextInt(100);
+
+				if (nextInt < plugin.getIdolsConfig().disarmChance) {
+
+					ItemStack weapon = EntityEquipment.getWeapon(livingEntity);
+					
+					if (weapon.getType() == Material.BOW)
+						return;
+					
+					for (ItemStack drop : drops){
+						if (Util.isWeapon(drop))
+							drops.remove(drop);
+					}
+					drops.add(weapon);
+					
+					player.sendMessage(ChatColor.RED + "You disarm your foe!");
+					return;
+				}
+			}
+
 		}
 		
-	} 
+	}
 
 }

@@ -1,6 +1,6 @@
 name: Idols
 main: com.octagami.idols.IdolsPlugin
-version: 0.0.9.15
+version: 0.0.9.20
 description: A collection of randomly useful commands
 authors: [octagami]
 depend: [Vault, Jobs, WorldEdit]
@@ -30,10 +30,6 @@ commands:
         description: Displays the days since the player joined the server
         permission: idols.history
         usage: /<command>
-    spawners:
-        description: Turns mob spawners off and on
-        permission: idols.spawners
-        usage: /<command> [on/off]
     idols:
         description: Shows help and allows a reload
         permission: idols.idols
@@ -49,7 +45,6 @@ permissions:
             idols.potion: true
             idols.poke: true
             idols.history: true
-            idols.spawners: true
             idols.idols: true
     idols.players.*:
         description: Gives access to all player level Idols commands
@@ -63,7 +58,6 @@ permissions:
     idols.admin.*:
         description: Gives access to all admin level Idols commands
         children:
-            idols.spawners: true
             idols.idols: true
     idols.cake:
         description: Gives the player some cake
@@ -83,9 +77,6 @@ permissions:
     idols.history:
         description: Displays the days since the player joined the server
         default: false
-    idols.spawners:
-        description: Turns mob spawners off and on
-        default: op
     idols.idols:
         description: Shows help and allows a reload
         default: op

@@ -31,7 +31,7 @@ public class IdolsPlugin extends JavaPlugin {
 	public static final String		NAME				= "Idols";
 	public static final String		PERMISSION_ROOT		= "idols.";
 	public static final String		MAIN_CLASS			= IdolsPlugin.class.getName();
-	public static final String		VERSION				= "0.0.9.15";
+	public static final String		VERSION				= "0.0.9.18";
 	public static final String		DESCRIPTION			= "A collection of randomly useful commands";
 	public static final String[]	AUTHORS				= { "octagami" };
 	public static final String		WEBSITE				= "";

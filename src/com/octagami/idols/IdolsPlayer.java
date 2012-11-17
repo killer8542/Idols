@@ -1,6 +1,7 @@
 package com.octagami.idols;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
 import com.octagami.idols.exceptions.IdolsNotLoadedException;
@@ -14,6 +15,7 @@ public class IdolsPlayer {
 	private int fallImmunityTimerTaskId = -1;
 	
 	private boolean	berserk = false;
+	private boolean	innateArmor = false;
 	private int berserkTimerTaskId = -1;
 	
 	private boolean	radar = false;
@@ -51,6 +53,21 @@ public class IdolsPlayer {
 		return totalDiamondsBroken;
 	}
 	
+	public void hasQuit() {
+		
+		cancelTasks();
+	}
+	
+	public void hasDied() {
+		
+		cancelTasks();
+		
+		this.innateArmor = false;
+		this.fallImmunity = false;
+		this.berserk = false;
+		this.fireResist = false;
+		this.radar = false;
+	}
 	
 	public void cancelTasks() {
 		
@@ -98,6 +115,16 @@ public class IdolsPlayer {
 		
 		return player.hasPermission("idols.headshot");
 	}
+	
+	public boolean canDisarm() {
+		
+		return player.hasPermission("idols.disarm");
+	}
+
+	public boolean canArmorBreaker() {
+
+		return player.hasPermission("idols.armorbreaker");
+	}	
 	
 	public void enableFireResist(boolean value) {
 		
@@ -154,6 +181,71 @@ public class IdolsPlayer {
 			
 		}
 		
+	}
+	
+	public boolean canInnateArmor() {
+		
+		return player.hasPermission("idols.armor");
+	}
+	
+	public boolean isInnateArmored() {
+		
+		return this.innateArmor;
+	}
+	
+	public void enableInnateArmor(boolean value) {
+
+		this.innateArmor = value;
+	}
+	
+	public Material getInnateArmorLevel(String slot) {
+
+		if (player.hasPermission("idols.armor.diamond")) {
+			
+			if (slot.equals("helmet"))
+				return Material.DIAMOND_HELMET;
+			else if (slot.equals("chestplate"))
+				return Material.DIAMOND_CHESTPLATE;
+			else if (slot.equals("leggings"))
+				return Material.DIAMOND_LEGGINGS;
+			else if (slot.equals("boots"))
+				return Material.DIAMOND_BOOTS;
+		}
+		else if (player.hasPermission("idols.armor.iron")) {
+			
+			if (slot.equals("helmet"))
+				return Material.IRON_HELMET;
+			else if (slot.equals("chestplate"))
+				return Material.IRON_CHESTPLATE;
+			else if (slot.equals("leggings"))
+				return Material.IRON_LEGGINGS;
+			else if (slot.equals("boots"))
+				return Material.IRON_BOOTS;
+		}
+		else if (player.hasPermission("idols.armor.chain")) {
+			
+			if (slot.equals("helmet"))
+				return Material.CHAINMAIL_HELMET;
+			else if (slot.equals("chestplate"))
+				return Material.CHAINMAIL_CHESTPLATE;
+			else if (slot.equals("leggings"))
+				return Material.CHAINMAIL_LEGGINGS;
+			else if (slot.equals("boots"))
+				return Material.CHAINMAIL_BOOTS;
+		}
+		else if (player.hasPermission("idols.armor.leather")) {
+			
+			if (slot.equals("helmet"))
+				return Material.LEATHER_HELMET;
+			else if (slot.equals("chestplate"))
+				return Material.LEATHER_CHESTPLATE;
+			else if (slot.equals("leggings"))
+				return Material.LEATHER_LEGGINGS;
+			else if (slot.equals("boots"))
+				return Material.LEATHER_BOOTS;
+		}
+	
+		return Material.AIR;
 	}
 	
 	public boolean canBerserk() {

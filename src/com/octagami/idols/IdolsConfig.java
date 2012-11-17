@@ -21,10 +21,16 @@ public class IdolsConfig {
 	public final String GENERAL_CONFIG_NAME = "generalConfig.yml";
 	public final String ENCHANT_CONFIG_NAME = "enchantsConfig.yml";
 	
+	public int innateArmorDuration = 5;
 	public boolean berserkAllowInPvp = false;
-	public int berserkFrequency = 0;
+	public int berserkFrequency = 10;
 	public int berserkDuration = 30;
 	public double berserkCritMultiplier = 1.25;
+	public int berserkHeadDropChance = 1;
+	
+	public int disarmChance = 50;
+	public int armorBreakerChance = 50;
+	
     
 	public int fallImmunityDuration = 30;
 	
@@ -55,28 +61,17 @@ public class IdolsConfig {
 	public double headshotCritMultiplier = 1.25;
 	public double headshotAboveThreshold = 0.5;
 	public double headshotBelowThreshold = 0.2;
+	public int headshotHeadDropChance = 1;
 	private ArrayList<EntityType> headshotMobs = new ArrayList<EntityType>();
     
     public boolean emotesEnabled = true;
     
 	public int emoteDistance = 10;
-	
-	private boolean disableSpawners = false;
-  
+
     public IdolsConfig(IdolsPlugin plugin) {
         this.plugin = plugin;
     }
     
-    public boolean areSpawnersDisabled() {
-    	
-    	return disableSpawners;
-    }
-    
-    public void setDisableSpawners(boolean value) {
-    	
-    	disableSpawners = value;
-    }
-    	
     public void reload() {
     	
     	loadSettings();
@@ -216,6 +211,24 @@ public class IdolsConfig {
         ConfigurationSection soldierSection = conf.getConfigurationSection("Soldier");
         if (soldierSection == null) soldierSection = conf.createSection("Soldier");
         
+        if (!soldierSection.contains("disarm-chance")) {
+        	soldierSection.set("disarm-chance", 50);
+        }
+        disarmChance = soldierSection.getInt("disarm-chance");
+        
+        if (!soldierSection.contains("armor-breaker-chance")) {
+        	soldierSection.set("armor-breaker-chance", 50);
+        }
+        armorBreakerChance = soldierSection.getInt("armor-breaker-chance");
+
+        ConfigurationSection innateArmorSection  = soldierSection.getConfigurationSection("Innate-Armor");
+        if (innateArmorSection == null) innateArmorSection = soldierSection.createSection("Innate-Armor");
+        
+        if (!innateArmorSection.contains("duration-ticks")) {
+        	innateArmorSection.set("duration-ticks", 5);
+        }
+        innateArmorDuration = innateArmorSection.getInt("duration-ticks");
+        
         ConfigurationSection berserkSection  = soldierSection.getConfigurationSection("Berserk");
         if (berserkSection == null) berserkSection = soldierSection.createSection("Berserk");
         
@@ -238,6 +251,11 @@ public class IdolsConfig {
         	berserkSection.set("crit-multiplier", 1.25);
         }
         berserkCritMultiplier = berserkSection.getDouble("crit-multiplier");
+        
+        if (!berserkSection.contains("head-drop-chance")) {
+        	berserkSection.set("head-drop-chance", 1);
+        }
+        berserkHeadDropChance = berserkSection.getInt("head-drop-chance");
         
         // Woodsman
         ConfigurationSection woodsmanSection = conf.getConfigurationSection("Woodsman");
@@ -265,6 +283,11 @@ public class IdolsConfig {
         	headshotSection.set("below-threshold", 0.2);
         }
         headshotBelowThreshold = headshotSection.getDouble("below-threshold");
+        
+        if (!headshotSection.contains("head-drop-chance")) {
+        	headshotSection.set("head-drop-chance", 1);
+        }
+        headshotHeadDropChance = headshotSection.getInt("head-drop-chance");
         
         if (headshotSection.getStringList("headshot-mobs").isEmpty()) 
         	headshotSection.set("headshot-mobs", new ArrayList<String>( Arrays.asList("Zombie", "Skeleton", "Creeper") ) );
@@ -323,6 +346,14 @@ public class IdolsConfig {
             e.printStackTrace();
         }
         
+    }
+    
+    public boolean isHeadShotMob(EntityType entity) {
+    	
+    	if (headshotMobs.contains(entity))
+    		return true;
+    	
+    	return false;
     }
 
 }
