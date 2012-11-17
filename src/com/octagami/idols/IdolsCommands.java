@@ -50,8 +50,6 @@ public class IdolsCommands {
     
     public static final IdolCommand[] adminCommands = {
 	
-		new IdolCommand("spawners",    new ArrayList<String>(), 
-						"op",          "Turns mob spawners off and on",        new ArrayList<String>(Arrays.asList("on/off"))),
 		new IdolCommand("idols",       new ArrayList<String>(), 
 		                "op",          "Shows help and allows a reload",       new ArrayList<String>())
     };
