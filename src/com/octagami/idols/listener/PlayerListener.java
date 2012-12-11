@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.WorldType;
 import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.entity.CraftLivingEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -26,6 +27,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.inventory.ItemStack;
@@ -44,11 +46,27 @@ import com.octagami.idols.util.Util;
 @SuppressWarnings("unused")
 public class PlayerListener implements Listener {
 
-	private final IdolsPlugin	plugin;
+	private final IdolsPlugin plugin;
 	
 	public PlayerListener(IdolsPlugin plugin) {
 
 		this.plugin = plugin;
+	}
+	
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled = true)
+	public void onPlayerRespawn(PlayerRespawnEvent event) {
+		
+		if(!plugin.isEnabled()) 
+			return;
+		
+		final Player player = event.getPlayer();
+		
+		// Fix for https://bukkit.atlassian.net/browse/BUKKIT-2827
+		for (PotionEffect effect : player.getActivePotionEffects())
+	        player.removePotionEffect(effect.getType());
+		
+//		if (player.hasPotionEffect(PotionEffectType.INVISIBILITY))
+//		player.removePotionEffect(PotionEffectType.INVISIBILITY);
 	}
 	
 	@EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
