@@ -1,7 +1,9 @@
 package com.octagami.idols.listener;
 
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import com.octagami.idols.IdolsPlayerManager;
@@ -17,14 +19,23 @@ public class LoginListener implements Listener {
 
 	}
 	
-	@EventHandler
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled = true)
+	public void onPlayerJoin(PlayerJoinEvent event) {
+		
+		if(!plugin.isEnabled()) 
+			return;
+
+		if(event.getPlayer().hasPermission("essentials.fly"))
+			IdolsPlayerManager.getPlayer(event.getPlayer()).enableFallImmunity(true);
+	}
+
+	@EventHandler(priority=EventPriority.MONITOR, ignoreCancelled = true)
 	public void onPlayerQuit(PlayerQuitEvent event) {
 		
 		if(!plugin.isEnabled()) 
 			return;
 
 		IdolsPlayerManager.playerQuit(event.getPlayer());
-
 	}
 
 }

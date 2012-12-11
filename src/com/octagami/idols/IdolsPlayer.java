@@ -11,6 +11,8 @@ public class IdolsPlayer {
 	
 	private Player player;
 
+	private boolean speed = false;
+	
 	private boolean	fallImmunity = false;
 	private int fallImmunityTimerTaskId = -1;
 	
@@ -54,8 +56,17 @@ public class IdolsPlayer {
 	}
 	
 	public void hasQuit() {
-		
+
 		cancelTasks();
+		
+		player.setWalkSpeed((float)0.2);
+		this.speed = false;
+		
+		this.innateArmor = false;
+		this.fallImmunity = false;
+		this.berserk = false;
+		this.fireResist = false;
+		this.radar = false;
 	}
 	
 	public void hasDied() {
@@ -95,6 +106,48 @@ public class IdolsPlayer {
 		}
 		
 	}
+	
+	public boolean canUseSpeed() {
+		
+		return player.hasPermission("idols.speed");
+	}
+	
+	public boolean isSpeedEnabled() {
+		
+		return this.speed;
+	}	
+	
+	public void enableSpeed(boolean value) {
+		
+		if (value) {
+			
+			IdolsPlugin plugin;
+			
+			try {
+				plugin = Idols.getPlugin();
+			} catch (IdolsNotLoadedException e1) {
+				e1.printStackTrace();
+				return;
+			}
+			
+			float speedMultiplier = (float)plugin.getIdolsConfig().walkSpeedRank1;
+					
+			if (player.hasPermission("idols.speed.rank2")) {
+				speedMultiplier = (float)plugin.getIdolsConfig().walkSpeedRank2;
+			}
+			
+			float speed = (float)(0.2f * speedMultiplier);
+
+			player.setWalkSpeed(speed);
+			this.speed = true;
+			
+		} else {
+			
+			player.setWalkSpeed((float)0.2);
+			this.speed = false;
+		}
+
+	}	
 	
 	public boolean canSeeDamage() {
 		

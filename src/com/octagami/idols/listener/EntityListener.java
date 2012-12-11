@@ -61,7 +61,7 @@ public class EntityListener implements Listener {
 				IdolsPlayerManager.getPlayer(player).isFallImmune() &&
 				event.getDamage() >= player.getHealth()) {
 
-				player.sendMessage(ChatColor.RED + "A committed builder fears no heights!");
+				player.sendMessage(ChatColor.RED + "You miraculously avoid falling to your death!");
 				
 				Idols.emote(player, " miraculously avoids falling to his death!");
 					

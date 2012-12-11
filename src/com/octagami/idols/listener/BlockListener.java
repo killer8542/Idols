@@ -86,17 +86,24 @@ public class BlockListener implements Listener {
     		
     		IdolsPlayerManager.getPlayer(event.getPlayer()).incrementDiamondCounter();
     		
+    		final int alertThreshold = plugin.getIdolsConfig().alertThreshold;
+
     		plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 				
 	            public void run() { 
 	            	
 	            	Player player = plugin.getServer().getPlayer(playerName);
-	            	
+
 	            	if (player != null) {
-	            		
+
 	            		int amountMined = IdolsPlayerManager.getPlayer(player).getDiamondBreakCounter();
 		            	int totalMined = IdolsPlayerManager.getPlayer(player).getTotalDiamondsBroken();
 		            	
+		            	if (totalMined <= alertThreshold) {
+		            		IdolsPlayerManager.getPlayer(player).resetDiamondCounter();
+		            		return;
+		            	}
+		        			
 		            	String alertString = player.getName() + " just broke " + Integer.toString(amountMined) + " diamond ore. " +
 	                            Integer.toString(totalMined) + " total have been mined this session";
 		            	

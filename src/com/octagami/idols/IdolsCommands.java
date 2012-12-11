@@ -39,6 +39,8 @@ public class IdolsCommands {
 			        		"false",  "Spawns a homie",                    new ArrayList<String>()),
     		new IdolCommand("radar",  new ArrayList<String>(), 
 			        		"false",  "Detects nearby ore",                new ArrayList<String>()),
+    		new IdolCommand("speed",  new ArrayList<String>(), 
+	        		"false",  "Increases your speed",                      new ArrayList<String>()),
     		new IdolCommand("potion", new ArrayList<String>(), 
 	        		        "false",  "Creates potions",                   new ArrayList<String>()),			        		
     	    new IdolCommand("poke",   new ArrayList<String>(), 

@@ -67,6 +67,11 @@ public class IdolsConfig {
     public boolean emotesEnabled = true;
     
 	public int emoteDistance = 10;
+	
+	public int alertThreshold = 6;
+	
+	public double walkSpeedRank1 = 1.2;
+	public double walkSpeedRank2 = 1.4;
 
     public IdolsConfig(IdolsPlugin plugin) {
         this.plugin = plugin;
@@ -327,6 +332,11 @@ public class IdolsConfig {
         }
         alertDelay = alertsSection.getInt("alert-delay");
         
+        if (!alertsSection.contains("alert-threshold")) {
+        	alertsSection.set("alert-threshold", 6);
+        }
+        alertThreshold = alertsSection.getInt("alert-threshold");
+        
         ConfigurationSection emotesSection  = miscSection.getConfigurationSection("Emotes");
         if (emotesSection == null) emotesSection = miscSection.createSection("Emotes");
         
@@ -339,6 +349,19 @@ public class IdolsConfig {
         	emotesSection.set("distance", 10);
         }
         emoteDistance = emotesSection.getInt("distance");
+        
+        ConfigurationSection rankSection  = miscSection.getConfigurationSection("Rank");
+        if (rankSection == null) rankSection = miscSection.createSection("Rank");
+        
+        if (!rankSection.contains("walk-speed-rank1")) {
+        	rankSection.set("walk-speed-rank1", 1.2);
+        }
+        walkSpeedRank1 = rankSection.getDouble("walk-speed-rank1");
+        
+        if (!rankSection.contains("walk-speed-rank2")) {
+        	rankSection.set("walk-speed-rank2", 1.4);
+        }
+        walkSpeedRank2 = rankSection.getDouble("walk-speed-rank2");
         
         try {
             conf.save(f);

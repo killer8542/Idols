@@ -32,7 +32,6 @@ public class Idols {
 	public static void clear() {
 		
 		playerCooldowns.clear();
-
 	}
 
 	private static void check() throws IdolsNotLoadedException {

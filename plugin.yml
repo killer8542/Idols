@@ -1,6 +1,6 @@
 name: Idols
 main: com.octagami.idols.IdolsPlugin
-version: 0.0.9.20
+version: 0.0.9.22
 description: A collection of randomly useful commands
 authors: [octagami]
 depend: [Vault, Jobs, WorldEdit]
@@ -17,6 +17,10 @@ commands:
     radar:
         description: Detects nearby ore
         permission: idols.radar
+        usage: /<command>
+    speed:
+        description: Increases your speed
+        permission: idols.speed
         usage: /<command>
     potion:
         description: Creates potions
@@ -42,6 +46,7 @@ permissions:
             idols.cake: true
             idols.homie: true
             idols.radar: true
+            idols.speed: true
             idols.potion: true
             idols.poke: true
             idols.history: true
@@ -52,6 +57,7 @@ permissions:
             idols.cake: true
             idols.homie: true
             idols.radar: true
+            idols.speed: true
             idols.potion: true
             idols.poke: true
             idols.history: true
@@ -67,6 +73,9 @@ permissions:
         default: false
     idols.radar:
         description: Detects nearby ore
+        default: false
+    idols.speed:
+        description: Increases your speed
         default: false
     idols.potion:
         description: Creates potions
